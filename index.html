@@ -118,6 +118,7 @@
         const option = document.createElement("option");
         option.value = months;
         option.textContent = text;
+        if (months === '24') option.selected = true;
         select.appendChild(option);
       }
 
