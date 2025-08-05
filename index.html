@@ -33,26 +33,25 @@
       margin-bottom: 20px;
     }
     select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  font-size: 15px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  text-align: right;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  font-size: 15px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  text-align: right;
-  direction: ltr;
-  box-sizing: border-box;
-}
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      text-align: right;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      text-align: right;
+      direction: ltr;
+      box-sizing: border-box;
+    }
     button {
       background-color: #121212;
       color: white;
@@ -69,55 +68,55 @@ input {
       padding: 18px;
       border-radius: 14px;
     }
+    /* استایل شمارنده استفاده */
+    .usage-counter {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo">
     <h1>ماشین حساب سود سرمایه‌گذاری</h1>
-    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p><select id="plan" onchange="updateDurations()">
-  <option value="gold">🥇 طرح طلایی</option>
-  <option value="silver">🥈 طرح نقره‌ای</option>
-  <option value="bronze">🥉 طرح برنزی</option>
-</select>
+    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p>
 
-<select id="duration">
-  <!-- مقادیر با جاوااسکریپت بارگذاری می‌شوند -->
-</select>
+    <select id="plan" onchange="updateDurations()">
+      <option value="gold">🥇 طرح طلایی</option>
+      <option value="silver">🥈 طرح نقره‌ای</option>
+      <option value="bronze">🥉 طرح برنزی</option>
+    </select>
 
-<input id="amount" type="text" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان">
+    <select id="duration"></select>
 
-<button onclick="calculateProfit()">محاسبه</button>
+    <input id="amount" type="text" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان">
 
-<div class="result" id="result"></div>
+    <button onclick="calculateProfit()">محاسبه</button>
 
-  </div>  <script>
+    <div class="result" id="result"></div>
+
+    <!-- شمارنده استفاده -->
+    <div class="usage-counter">
+      📊 تعداد استفاده از ماشین‌حساب: <span id="useCount">0</span>
+    </div>
+  </div>
+
+  <script>
     const plans = {
-      gold: {
-        min: 25000000,
-        feePercent: 2,
-        profits: { '3': 13, '6': 27, '12': 59, '24': 123 },
-      },
-      silver: {
-        min: 10000000,
-        feePercent: 1,
-        profits: { '3': 9, '6': 20, '12': 52, '24': 114 },
-      },
-      bronze: {
-        min: 5000000,
-        feePercent: 0,
-        profits: { '3': 6, '6': 15, '12': 36, '24': 96 },
-      }
+      gold: { min: 25000000, feePercent: 2, profits: { '3': 13, '6': 27, '12': 59, '24': 123 } },
+      silver: { min: 10000000, feePercent: 1, profits: { '3': 9, '6': 20, '12': 52, '24': 114 } },
+      bronze: { min: 5000000, feePercent: 0, profits: { '3': 6, '6': 15, '12': 36, '24': 96 } }
     };
 
     function numberWithCommas(x) {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     function formatInputAmount(e) {
-  const input = e.target;
-  const raw = input.value.replace(/[^\d]/g, '');
-  input.value = numberWithCommas(raw);
-}
+      const input = e.target;
+      const raw = input.value.replace(/[^\d]/g, '');
+      input.value = numberWithCommas(raw);
+    }
 
     function updateDurations() {
       const plan = document.getElementById("plan").value;
@@ -132,9 +131,8 @@ input {
         if (months === '24') option.selected = true;
         select.appendChild(option);
       }
-
       const input = document.getElementById("amount");
-      input.placeholder = `حداقل مبلغ${numberWithCommas(plans[plan].min)} تومان`;
+      input.placeholder = `حداقل مبلغ ${numberWithCommas(plans[plan].min)} تومان`;
     }
 
     function calculateProfit() {
@@ -142,7 +140,6 @@ input {
       const months = document.getElementById("duration").value;
       const rawAmount = document.getElementById("amount").value.replace(/[^\d]/g, '');
       const amount = parseInt(rawAmount);
-
       const plan = plans[planKey];
 
       if (isNaN(amount) || amount < plan.min) {
@@ -155,7 +152,6 @@ input {
       const monthlyProfit = Math.round(totalProfit / months);
       const fee = Math.round((plan.feePercent / 100) * (amount + totalProfit));
       const finalAmount = amount + totalProfit - fee;
-
       const feeText = plan.feePercent === 0 ? "بدون کارمزد" : `${plan.feePercent}%`;
 
       document.getElementById("result").innerHTML =
@@ -165,9 +161,31 @@ input {
           کارمزد: ${feeText}<br>
           مبلغ قابل برداشت نهایی: ${numberWithCommas(finalAmount)} تومان
         </div>`;
+
+      // افزایش شمارنده استفاده
+      updateCounter();
+    }
+
+    // شمارنده استفاده با countapi
+    const COUNTER_NS = 'repay_calc';
+    const COUNTER_KEY = 'usage_count';
+
+    function getCurrentCount() {
+      fetch(`https://api.countapi.xyz/get/${COUNTER_NS}/${COUNTER_KEY}`)
+        .then(r => r.json())
+        .then(d => { document.getElementById('useCount').innerText = d.value || 0; })
+        .catch(() => { document.getElementById('useCount').innerText = '0'; });
+    }
+    function updateCounter() {
+      fetch(`https://api.countapi.xyz/hit/${COUNTER_NS}/${COUNTER_KEY}`)
+        .then(r => r.json())
+        .then(d => { document.getElementById('useCount').innerText = d.value; })
+        .catch(() => {});
     }
 
     updateDurations();
     document.getElementById("amount").addEventListener("input", formatInputAmount);
-  </script></body>
+    document.addEventListener("DOMContentLoaded", getCurrentCount);
+  </script>
+</body>
 </html>
