@@ -101,6 +101,11 @@
     function numberWithCommas(x) {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+    function formatInputAmount(e) {
+  const input = e.target;
+  const raw = input.value.replace(/[^\d]/g, '');
+  input.value = numberWithCommas(raw);
+}
 
     function updateDurations() {
       const plan = document.getElementById("plan").value;
@@ -150,5 +155,6 @@
     }
 
     updateDurations();
+    document.getElementById("amount").addEventListener("input", formatInputAmount);
   </script></body>
 </html>
