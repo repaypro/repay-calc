@@ -167,21 +167,55 @@
     }
 
     // شمارنده استفاده با countapi
-    const COUNTER_NS = 'repay_calc';
-    const COUNTER_KEY = 'usage_count';
+    <script>
+  const COUNTER_NS  = 'repay_calc';      // اگر خواستی، نام دلخواهت
+  const COUNTER_KEY = 'usage_count';     // اگر خواستی، نام دلخواهت
+  const URL_GET = `https://api.countapi.xyz/get/${COUNTER_NS}/${COUNTER_KEY}`;
+  const URL_HIT = `https://api.countapi.xyz/hit/${COUNTER_NS}/${COUNTER_KEY}`;
 
-    function getCurrentCount() {
-      fetch(`https://api.countapi.xyz/get/${COUNTER_NS}/${COUNTER_KEY}`)
-        .then(r => r.json())
-        .then(d => { document.getElementById('useCount').innerText = d.value || 0; })
-        .catch(() => { document.getElementById('useCount').innerText = '0'; });
-    }
-    function updateCounter() {
-      fetch(`https://api.countapi.xyz/hit/${COUNTER_NS}/${COUNTER_KEY}`)
-        .then(r => r.json())
-        .then(d => { document.getElementById('useCount').innerText = d.value; })
-        .catch(() => {});
-    }
+  // JSONP fallback برای دور زدن CORS/AdBlock
+  function jsonp(url) {
+    return new Promise((resolve, reject) => {
+      const cb = 'cb_' + Math.random().toString(36).slice(2);
+      window[cb] = data => { resolve(data); cleanup(); };
+      const s = document.createElement('script');
+      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+      s.onerror = () => { reject(); cleanup(); };
+      document.body.appendChild(s);
+      function cleanup() { delete window[cb]; s.remove(); }
+    });
+  }
+
+  function setCount(v) {
+    document.getElementById('useCount').innerText = (v ?? 0);
+  }
+
+  function getCurrentCount() {
+    fetch(URL_GET)
+      .then(r => r.json())
+      .then(d => setCount(d.value))
+      .catch(() => {
+        jsonp(URL_GET)
+          .then(d => setCount(d.value))
+          .catch(() => setCount(0));
+      });
+  }
+
+  function updateCounter() {
+    // افزایش خوش‌بینانه برای فیدبک فوری
+    const el = document.getElementById('useCount');
+    el.innerText = (parseInt(el.innerText || '0', 10) + 1);
+
+    fetch(URL_HIT)
+      .then(r => r.json())
+      .then(d => setCount(d.value))
+      .catch(() => {
+        jsonp(URL_HIT)
+          .then(d => setCount(d.value))
+          .catch(() => { /* اگر نشد، همان مقدار خوش‌بینانه می‌ماند */ });
+      });
+  }
+</script>
 
     updateDurations();
     document.getElementById("amount").addEventListener("input", formatInputAmount);
