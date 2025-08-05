@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -68,7 +69,6 @@
       padding: 18px;
       border-radius: 14px;
     }
-    /* استایل شمارنده استفاده */
     .usage-counter {
       margin-top: 40px;
       font-size: 14px;
@@ -96,7 +96,6 @@
 
     <div class="result" id="result"></div>
 
-    <!-- شمارنده استفاده -->
     <div class="usage-counter">
       📊 تعداد استفاده از ماشین‌حساب: <span id="useCount">0</span>
     </div>
@@ -162,63 +161,50 @@
           مبلغ قابل برداشت نهایی: ${numberWithCommas(finalAmount)} تومان
         </div>`;
 
-      // افزایش شمارنده استفاده
       updateCounter();
     }
 
-    // شمارنده استفاده با countapi
-    
-  const COUNTER_NS  = 'repay_calc';      // اگر خواستی، نام دلخواهت
-  const COUNTER_KEY = 'usage_count';     // اگر خواستی، نام دلخواهت
-  const URL_GET = `https://api.countapi.xyz/get/${COUNTER_NS}/${COUNTER_KEY}`;
-  const URL_HIT = `https://api.countapi.xyz/hit/${COUNTER_NS}/${COUNTER_KEY}`;
+    // شمارنده با Google Apps Script
+    const COUNTER_NS  = 'repay_calc';
+    const COUNTER_KEY = 'usage_count';
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbxkeNkd__in37pKasVS0lhD7ffK7iB2dxS1A7hSgY8R9TngJLjfRwcIp4kuowDs7O-4/exec';
 
-  // JSONP fallback برای دور زدن CORS/AdBlock
-  function jsonp(url) {
-    return new Promise((resolve, reject) => {
-      const cb = 'cb_' + Math.random().toString(36).slice(2);
-      window[cb] = data => { resolve(data); cleanup(); };
-      const s = document.createElement('script');
-      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-      s.onerror = () => { reject(); cleanup(); };
-      document.body.appendChild(s);
-      function cleanup() { delete window[cb]; s.remove(); }
-    });
-  }
+    const URL_GET = `${API_BASE}?op=get&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
+    const URL_HIT = `${API_BASE}?op=hit&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
 
-  function setCount(v) {
-    document.getElementById('useCount').innerText = (v ?? 0);
-  }
-
-  function getCurrentCount() {
-    fetch(URL_GET)
-      .then(r => r.json())
-      .then(d => setCount(d.value))
-      .catch(() => {
-        jsonp(URL_GET)
-          .then(d => setCount(d.value))
-          .catch(() => setCount(0));
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Math.random().toString(36).slice(2);
+        window[cb] = data => { resolve(data); cleanup(); };
+        const s = document.createElement('script');
+        s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+        s.onerror = () => { reject(); cleanup(); };
+        document.body.appendChild(s);
+        function cleanup() { delete window[cb]; s.remove(); }
       });
-  }
+    }
 
-  function updateCounter() {
-    // افزایش خوش‌بینانه برای فیدبک فوری
-    const el = document.getElementById('useCount');
-    el.innerText = (parseInt(el.innerText || '0', 10) + 1);
+    function setCount(v) {
+      document.getElementById('useCount').innerText = (v ?? 0);
+    }
 
-    fetch(URL_HIT)
-      .then(r => r.json())
-      .then(d => setCount(d.value))
-      .catch(() => {
-        jsonp(URL_HIT)
-          .then(d => setCount(d.value))
-          .catch(() => { /* اگر نشد، همان مقدار خوش‌بینانه می‌ماند */ });
-      });
-  }
+    function getCurrentCount() {
+      jsonp(URL_GET)
+        .then(d => setCount(d.value))
+        .catch(() => setCount(0));
+    }
+
+    function updateCounter() {
+      const el = document.getElementById('useCount');
+      el.innerText = (parseInt(el.innerText || '0', 10) + 1);
+      jsonp(URL_HIT)
+        .then(d => setCount(d.value))
+        .catch(() => { /* اگر خطا شد، همان مقدار خوش‌بینانه می‌ماند */ });
+    }
 
     updateDurations();
     document.getElementById("amount").addEventListener("input", formatInputAmount);
     document.addEventListener("DOMContentLoaded", getCurrentCount);
   </script>
 </body>
-</html>
+</html> 
