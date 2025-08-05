@@ -1,153 +1,154 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ماشین حساب سود سرمایه‌گذاری</title>
   <style>
     body {
-      font-family: "IRANSans", sans-serif;
-      background: #f2f2f2;
+      font-family: IranSans, sans-serif;
+      direction: rtl;
+      background-color: #f5f5f5;
       margin: 0;
       padding: 0;
+      text-align: center;
+      color: #2d0c59;
     }
     .container {
       max-width: 400px;
-      margin: 40px auto;
       background: white;
-      border-radius: 20px;
+      margin: 30px auto;
       padding: 30px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      border-radius: 25px;
     }
     img.logo {
-      width: 70px;
-      display: block;
-      margin: 0 auto 10px;
-    }
-    h2 {
-      text-align: center;
-      color: #2d0c59;
+      width: 90px;
       margin-bottom: 10px;
     }
+    h1 {
+      font-size: 22px;
+      margin: 10px 0;
+    }
     p {
-      text-align: center;
-      color: #444;
+      font-size: 14px;
       margin-bottom: 20px;
     }
-    select, input[type="text"], button {
+    select, input {
       width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      margin: 10px 0;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 15px;
       border-radius: 12px;
       border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    input[type="text"]::placeholder {
-      color: #aaa;
+      text-align: right;
     }
     button {
-      background-color: #1a1a2e;
+      background-color: #121212;
       color: white;
       border: none;
-      font-size: 18px;
-      font-weight: bold;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
       cursor: pointer;
+      width: 100%;
+      margin-bottom: 15px;
     }
     .result {
-      margin-top: 20px;
-      background: #fafafa;
-      padding: 20px;
-      border-radius: 15px;
-      font-size: 16px;
-      line-height: 2;
-      color: #2d0c59;
+      background-color: #fafafa;
+      padding: 18px;
+      border-radius: 14px;
     }
   </style>
 </head>
 <body>
-
   <div class="container">
     <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo">
-    <h2>ماشین حساب سود سرمایه‌گذاری</h2>
-    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p>
+    <h1>ماشین حساب سود سرمایه‌گذاری</h1>
+    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p><select id="plan" onchange="updateDurations()">
+  <option value="gold">🥇 طرح طلایی</option>
+  <option value="silver">🥈 طرح نقره‌ای</option>
+  <option value="bronze">🥉 طرح برنزی</option>
+</select>
 
-    <select id="plan" onchange="updatePlaceholder()">
-      <option value="gold">🥇 طرح طلایی</option>
-      <option value="silver">🥈 طرح نقره‌ای</option>
-      <option value="bronze">🥉 طرح برنزی</option>
-    </select>
+<select id="duration">
+  <!-- مقادیر با جاوااسکریپت بارگذاری می‌شوند -->
+</select>
 
-    <select id="duration">
-      <option value="3">3 ماهه - %13 / %9 / %6</option>
-      <option value="6">6 ماهه - %27 / %20 / %15</option>
-      <option value="12">1 ساله - %59 / %52 / %36</option>
-      <option value="24">2 ساله - %123 / %114 / %96</option>
-    </select>
+<input id="amount" type="text" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان">
 
-    <input type="text" id="amount" placeholder="مثلاً ۲۵۰۰۰۰۰۰ تومان" oninput="formatInput(this)">
+<button onclick="calculateProfit()">محاسبه</button>
 
-    <button onclick="calculate()">محاسبه</button>
+<div class="result" id="result"></div>
 
-    <div class="result" id="result" style="display:none;"></div>
-  </div>
-
-  <script>
+  </div>  <script>
     const plans = {
-      gold: { min: 25000000, fees: 0.02, profits: { 3: 13, 6: 27, 12: 59, 24: 123 } },
-      silver: { min: 10000000, fees: 0.01, profits: { 3: 9, 6: 20, 12: 52, 24: 114 } },
-      bronze: { min: 5000000, fees: 0, profits: { 3: 6, 6: 15, 12: 36, 24: 96 } }
+      gold: {
+        min: 25000000,
+        feePercent: 2,
+        profits: { '3': 13, '6': 27, '12': 59, '24': 123 },
+      },
+      silver: {
+        min: 10000000,
+        feePercent: 1,
+        profits: { '3': 9, '6': 20, '12': 52, '24': 114 },
+      },
+      bronze: {
+        min: 5000000,
+        feePercent: 0,
+        profits: { '3': 6, '6': 15, '12': 36, '24': 96 },
+      }
     };
 
-    function formatNumber(n) {
-      return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    function numberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    function unformatNumber(s) {
-      return parseInt(s.replace(/,/g, ""));
-    }
-
-    function updatePlaceholder() {
+    function updateDurations() {
       const plan = document.getElementById("plan").value;
-      const min = plans[plan].min;
-      document.getElementById("amount").placeholder = `حداقل مبلغ ${formatNumber(min)} تومان`;
+      const durations = plans[plan].profits;
+      const select = document.getElementById("duration");
+      select.innerHTML = "";
+      for (const [months, percent] of Object.entries(durations)) {
+        let text = `${months} ماهه – ${percent}%`;
+        const option = document.createElement("option");
+        option.value = months;
+        option.textContent = text;
+        select.appendChild(option);
+      }
+
+      const input = document.getElementById("amount");
+      input.placeholder = `مثلاً ${numberWithCommas(plans[plan].min)} تومان`;
     }
 
-    function formatInput(el) {
-      let value = el.value.replace(/[^0-9]/g, "");
-      el.value = formatNumber(value);
-    }
+    function calculateProfit() {
+      const planKey = document.getElementById("plan").value;
+      const months = document.getElementById("duration").value;
+      const rawAmount = document.getElementById("amount").value.replace(/[^\d]/g, '');
+      const amount = parseInt(rawAmount);
 
-    function calculate() {
-      const plan = document.getElementById("plan").value;
-      const duration = parseInt(document.getElementById("duration").value);
-      const rawAmount = document.getElementById("amount").value;
-      const amount = unformatNumber(rawAmount);
+      const plan = plans[planKey];
 
-      const planData = plans[plan];
-      const minAmount = planData.min;
-
-      if (isNaN(amount) || amount < minAmount) {
-        alert(`حداقل مبلغ برای این طرح ${formatNumber(minAmount)} تومان است.`);
+      if (isNaN(amount) || amount < plan.min) {
+        alert(`حداقل مبلغ برای ${document.getElementById("plan").selectedOptions[0].text} ${numberWithCommas(plan.min)} تومان است.`);
         return;
       }
 
-      const percent = planData.profits[duration];
-      const profitTotal = Math.floor(amount * percent / 100);
-      const monthlyProfit = Math.floor(profitTotal / duration);
-      const fee = Math.floor((amount + profitTotal) * planData.fees);
-      const finalAmount = amount + profitTotal - fee;
+      const percent = plan.profits[months];
+      const totalProfit = Math.round((amount * percent) / 100);
+      const monthlyProfit = Math.round(totalProfit / months);
+      const fee = Math.round((plan.feePercent / 100) * (amount + totalProfit));
+      const finalAmount = amount + totalProfit - fee;
 
-      document.getElementById("result").innerHTML = `
-        سود ماهانه: ${formatNumber(monthlyProfit)} تومان<br>
-        سود کل: ${formatNumber(profitTotal)} تومان<br>
-        کل کارمزد: ${formatNumber(fee)} تومان<br>
-        مبلغ قابل برداشت نهایی: ${formatNumber(finalAmount)} تومان
-      `;
-      document.getElementById("result").style.display = "block";
+      const feeText = plan.feePercent === 0 ? "بدون کارمزد" : `${plan.feePercent}%`;
+
+      document.getElementById("result").innerHTML =
+        `<div>
+          سود ماهانه: ${numberWithCommas(monthlyProfit)} تومان<br>
+          سود کل: ${numberWithCommas(totalProfit)} تومان<br>
+          کارمزد: ${feeText}<br>
+          مبلغ قابل برداشت نهایی: ${numberWithCommas(finalAmount)} تومان
+        </div>`;
     }
 
-    window.onload = updatePlaceholder;
-  </script>
-</body>
+    updateDurations();
+  </script></body>
 </html>
