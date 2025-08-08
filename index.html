@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="fa">
+<!DOCTYPE html><html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ماشین حساب سود سرمایه‌گذاری</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </title>ماشین حساب سود سرمایه گذاری</title>
   <style>
     body {
       font-family: IranSans, sans-serif;
@@ -15,156 +14,183 @@
       color: #2d0c59;
     }
     .container {
-      max-width: 400px;
-      background: white;
+      max-width: 420px;
+      background: #fff;
       margin: 30px auto;
       padding: 30px;
       border-radius: 25px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.06);
     }
-    img.logo {
-      width: 90px;
-      margin-bottom: 10px;
-    }
-    h1 {
-      font-size: 22px;
-      margin: 10px 0;
-    }
-    p {
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-    select {
+    img.logo { width: 90px; margin-bottom: 10px; }
+    h1 { font-size: 22px; margin: 10px 0; }
+    p { font-size: 14px; margin-bottom: 20px; }
+    select, input {
       width: 100%;
       padding: 12px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       font-size: 15px;
       border-radius: 12px;
       border: 1px solid #ccc;
       text-align: right;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      font-size: 15px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      text-align: right;
-      direction: ltr;
       box-sizing: border-box;
     }
+    input { direction: ltr; }
     button {
       background-color: #121212;
-      color: white;
+      color: #fff;
       border: none;
       padding: 14px;
       font-size: 16px;
       border-radius: 12px;
       cursor: pointer;
       width: 100%;
-      margin-bottom: 15px;
+      margin: 8px 0 16px;
     }
+    button:active { transform: translateY(1px); }
     .result {
       background-color: #fafafa;
       padding: 18px;
       border-radius: 14px;
+      text-align: right;
+      line-height: 1.9;
     }
     .usage-counter {
-      margin-top: 40px;
+      margin-top: 24px;
       font-size: 14px;
       color: #555;
     }
+    .error { color: #d33; font-size: 12px; text-align: right; min-height: 18px; margin: -6px 0 10px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo">
+    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
     <h1>ماشین حساب سود سرمایه‌گذاری</h1>
-    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p>
+    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p><div class="row">
+  <select id="plan" aria-label="انتخاب طرح" onchange="updateDurations()">
+    <option value="special" selected>🪙 طرح ویژه</option>
+    <option value="gold">🥇 طرح طلایی</option>
+    <option value="silver">🥈 طرح نقره‌ای</option>
+    <option value="bronze">🥉 طرح برنزی</option>
+  </select>
 
-    <select id="plan" onchange="updateDurations()">
-      <option value="gold">🥇 طرح طلایی</option>
-      <option value="silver">🥈 طرح نقره‌ای</option>
-      <option value="bronze">🥉 طرح برنزی</option>
-    </select>
+  <select id="duration" aria-label="انتخاب مدت"></select>
+</div>
 
-    <select id="duration"></select>
+<input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان" />
+<div id="amountError" class="error"></div>
 
-    <input id="amount" type="text" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان">
+<button id="calcBtn" type="button" onclick="calculateProfit()">محاسبه</button>
 
-    <button onclick="calculateProfit()">محاسبه</button>
+<div class="result" id="result" aria-live="polite"></div>
 
-    <div class="result" id="result"></div>
+<div class="usage-counter">📊 count : <span id="useCount">0</span></div>
 
-    <div class="usage-counter">
-      📊 count : <span id="useCount">0</span>
-    </div>
-  </div>
-
-  <script>
+  </div>  <script>
+    // ----- تنظیمات طرح‌ها -----
+    // NOTE: در صورت نیاز، مقدار min و feePercent برای طرح ویژه را به‌راحتی تغییر دهید
     const plans = {
-      gold: { min: 25000000, feePercent: 2, profits: { '3': 13, '6': 27, '12': 59, '24': 123 } },
-      silver: { min: 10000000, feePercent: 1, profits: { '3': 9, '6': 20, '12': 52, '24': 114 } },
-      bronze: { min: 5000000, feePercent: 0, profits: { '3': 6, '6': 15, '12': 36, '24': 96 } }
+      special: { min: 5000000, feePercent: 2, profits: { '12': 61 } }, // 🪙 طرح ویژه (فرض: حداقل مانند طلایی، کارمزد ۲٪)
+      gold:    { min: 25000000, feePercent: 2, profits: { '3': 13, '6': 27, '12': 59, '24': 123 } },
+      silver:  { min: 10000000, feePercent: 1, profits: { '3': 9,  '6': 20, '12': 52, '24': 114 } },
+      bronze:  { min:  5000000, feePercent: 0, profits: { '3': 6,  '6': 15, '12': 36, '24': 96 } }
     };
 
-    function numberWithCommas(x) {
-      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-    function formatInputAmount(e) {
-      const input = e.target;
-      const raw = input.value.replace(/[^\d]/g, '');
-      input.value = numberWithCommas(raw);
+    // قالب‌بندی عددی بومی
+    const nfFA = new Intl.NumberFormat('fa-IR');
+
+    function formatNumber(n){ return nfFA.format(n); }
+
+    function normalizeDigits(str){
+      // تبدیل ارقام فارسی/عربی به لاتین برای محاسبات
+      const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
+      return (str || '').replace(/[\u06F0-\u06F9\u0660-\u0669]/g, d => {
+        const i = fa.indexOf(d);
+        if (i > -1) return String(i);
+        const j = ar.indexOf(d);
+        if (j > -1) return String(j);
+        return d;
+      });
     }
 
-    function updateDurations() {
-      const plan = document.getElementById("plan").value;
-      const durations = plans[plan].profits;
-      const select = document.getElementById("duration");
-      select.innerHTML = "";
-      for (const [months, percent] of Object.entries(durations)) {
-        let text = `${months} ماهه – ${percent}%`;
-        const option = document.createElement("option");
+    function numberFromInput(val){
+      const normalized = normalizeDigits(val);
+      const raw = normalized.replace(/[^\d]/g, '');
+      return raw ? parseInt(raw, 10) : NaN;
+    }
+
+    function formatInputAmount(e){
+      const input = e.target;
+      const n = numberFromInput(input.value);
+      if (Number.isNaN(n)) { input.value = ''; return; }
+      input.value = formatNumber(n);
+    }
+
+    function setError(msg){
+      document.getElementById('amountError').textContent = msg || '';
+    }
+
+    function updateDurations(){
+      const planKey = document.getElementById('plan').value;
+      const durations = plans[planKey].profits;
+      const select = document.getElementById('duration');
+      select.innerHTML = '';
+      for (const [months, percent] of Object.entries(durations)){
+        const option = document.createElement('option');
         option.value = months;
-        option.textContent = text;
-        if (months === '24') option.selected = true;
+        option.textContent = `${months} ماهه – ${percent}%`;
         select.appendChild(option);
       }
-      const input = document.getElementById("amount");
-      input.placeholder = `حداقل مبلغ ${numberWithCommas(plans[plan].min)} تومان`;
+      // پیش‌فرض: اگر 24 ماه موجود است، همان را انتخاب کن؛ وگرنه آخرین گزینه
+      const has24 = Object.keys(durations).includes('24');
+      select.value = has24 ? '24' : Object.keys(durations).at(-1);
+
+      // به‌روزرسانی placeholder حداقل مبلغ
+      const min = plans[planKey].min;
+      document.getElementById('amount').placeholder = `حداقل مبلغ ${formatNumber(min)} تومان`;
+
+      // پاک‌کردن خطای قبلی و نتیجه
+      setError('');
+      document.getElementById('result').innerHTML = '';
     }
 
-    function calculateProfit() {
-      const planKey = document.getElementById("plan").value;
-      const months = document.getElementById("duration").value;
-      const rawAmount = document.getElementById("amount").value.replace(/[^\d]/g, '');
-      const amount = parseInt(rawAmount);
+    function calculateProfit(){
+      const planKey = document.getElementById('plan').value;
+      const months = document.getElementById('duration').value;
+      const amountVal = document.getElementById('amount').value;
+      const amount = numberFromInput(amountVal);
       const plan = plans[planKey];
 
-      if (isNaN(amount) || amount < plan.min) {
-        alert(`حداقل مبلغ برای ${document.getElementById("plan").selectedOptions[0].text} ${numberWithCommas(plan.min)} تومان است.`);
+      if (Number.isNaN(amount)){
+        setError('مبلغ را وارد کنید.');
         return;
       }
+      if (amount < plan.min){
+        setError(`حداقل مبلغ برای ${document.getElementById('plan').selectedOptions[0].text} ${formatNumber(plan.min)} تومان است.`);
+        return;
+      }
+      setError('');
 
       const percent = plan.profits[months];
       const totalProfit = Math.round((amount * percent) / 100);
-      const monthlyProfit = Math.round(totalProfit / months);
+      const monthlyProfit = Math.round(totalProfit / parseInt(months, 10));
       const fee = Math.round((plan.feePercent / 100) * (amount + totalProfit));
       const finalAmount = amount + totalProfit - fee;
-      const feeText = plan.feePercent === 0 ? "بدون کارمزد" : `${plan.feePercent}%`;
+      const feeText = plan.feePercent === 0 ? 'بدون کارمزد' : `${formatNumber(plan.feePercent)}٪`;
 
-      document.getElementById("result").innerHTML =
-        `<div>
-          سود ماهانه: ${numberWithCommas(monthlyProfit)} تومان<br>
-          سود کل: ${numberWithCommas(totalProfit)} تومان<br>
-          کارمزد: ${feeText}<br>
-          مبلغ قابل برداشت نهایی: ${numberWithCommas(finalAmount)} تومان
+      document.getElementById('result').innerHTML = `
+        <div>
+          سود ماهانه: ${formatNumber(monthlyProfit)} تومان<br />
+          سود کل: ${formatNumber(totalProfit)} تومان<br />
+          کارمزد: ${feeText}<br />
+          مبلغ قابل برداشت نهایی: ${formatNumber(finalAmount)} تومان
         </div>`;
 
       updateCounter();
     }
 
-    // شمارنده با Google Apps Script
+    // ----- شمارنده با Google Apps Script (همان نسخه شما) -----
     const COUNTER_NS  = 'repay_calc';
     const COUNTER_KEY = 'usage_count';
     const API_BASE = 'https://script.google.com/macros/s/AKfycbxkeNkd__in37pKasVS0lhD7ffK7iB2dxS1A7hSgY8R9TngJLjfRwcIp4kuowDs7O-4/exec';
@@ -172,7 +198,7 @@
     const URL_GET = `${API_BASE}?op=get&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
     const URL_HIT = `${API_BASE}?op=hit&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
 
-    function jsonp(url) {
+    function jsonp(url){
       return new Promise((resolve, reject) => {
         const cb = 'cb_' + Math.random().toString(36).slice(2);
         window[cb] = data => { resolve(data); cleanup(); };
@@ -180,31 +206,29 @@
         s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
         s.onerror = () => { reject(); cleanup(); };
         document.body.appendChild(s);
-        function cleanup() { delete window[cb]; s.remove(); }
+        function cleanup(){ delete window[cb]; s.remove(); }
       });
     }
 
-    function setCount(v) {
-      document.getElementById('useCount').innerText = (v ?? 0);
+    function setCount(v){ document.getElementById('useCount').innerText = (v ?? 0); }
+
+    function getCurrentCount(){
+      jsonp(URL_GET).then(d => setCount(d.value)).catch(() => setCount(0));
     }
 
-    function getCurrentCount() {
-      jsonp(URL_GET)
-        .then(d => setCount(d.value))
-        .catch(() => setCount(0));
-    }
-
-    function updateCounter() {
+    function updateCounter(){
       const el = document.getElementById('useCount');
       el.innerText = (parseInt(el.innerText || '0', 10) + 1);
-      jsonp(URL_HIT)
-        .then(d => setCount(d.value))
-        .catch(() => { /* اگر خطا شد، همان مقدار خوش‌بینانه می‌ماند */ });
+      jsonp(URL_HIT).then(d => setCount(d.value)).catch(() => {});
     }
 
-    updateDurations();
-    document.getElementById("amount").addEventListener("input", formatInputAmount);
-    document.addEventListener("DOMContentLoaded", getCurrentCount);
-  </script>
-</body>
-</html> 
+    // ----- init -----
+    document.getElementById('amount').addEventListener('input', formatInputAmount);
+    document.addEventListener('DOMContentLoaded', () => {
+      // پیش‌فرض طرح ویژه
+      document.getElementById('plan').value = 'special';
+      updateDurations();
+      getCurrentCount();
+    });
+  </script></body>
+</html>
