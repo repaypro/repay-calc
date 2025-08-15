@@ -93,7 +93,7 @@
         <option value="upfront">💠 سود یکجا</option>
       </select>
 
-      <!-- برای برخی طرح‌ها مدت ثابت است؛ برای VIP از کنترل اسلایدر استفاده می‌شود -->
+      <!-- مدت: برای VIP غیرفعال می‌شود -->
       <select id="duration" aria-label="انتخاب مدت"></select>
     </div>
 
@@ -103,10 +103,10 @@
       <input id="vipMonths" type="range" min="1" max="36" value="12" oninput="document.getElementById('vipMonthsVal').innerText=this.value">
       <div class="mini">مدت انتخابی: <b><span id="vipMonthsVal">12</span> ماه</b></div>
 
-      <label class="mini" style="margin-top:8px;">APR سالانه (روزشمار) — سقف ۶۱٪</label>
+      <label class="mini" style="margin-top:8px;">درصد سود انتخابی</label>
       <input id="vipAPR" type="range" min="0.01" max="0.61" step="0.01" value="0.30"
              oninput="document.getElementById('vipAPRVal').innerText=(this.value*100).toFixed(2)+'%'">
-      <div class="mini">APR انتخابی: <b><span id="vipAPRVal">30.00%</span></b></div>
+      <div class="mini">درصد سود انتخابی: <b><span id="vipAPRVal">30.00%</span></b></div>
     </div>
 
     <input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" />
@@ -245,7 +245,7 @@
     if (p.type === 'termYield') {
       const opt = document.createElement('option');
       opt.value = String(p.termMonths);
-      opt.textContent = `${p.termMonths} ماهه – ${Math.round(p.termYield*100)}%`;
+      opt.textContent = `${p.termMonths} ماهه`;
       sel.appendChild(opt);
     } else if (p.type === 'dailyAPR_withLoan') {
       const opt = document.createElement('option');
@@ -255,7 +255,7 @@
     } else if (p.type === 'dailyAPR_upfront') {
       const opt = document.createElement('option');
       opt.value = String(p.termMonths);
-      opt.textContent = `${p.termMonths} ماهه – سود روز اول`;
+      opt.textContent = `${p.termMonths} ماهه`;
       sel.appendChild(opt);
     } else if (p.type === 'dailyAPR_flexible') {
       vipBox.style.display = '';
@@ -287,26 +287,25 @@
     const loanAmount  = Math.round(P * pl.loanFactor);
     const loanRate    = proratedByMonths(pl.loanAPR, pl.termMonths);
     const loanInterest = Math.round(loanAmount * loanRate);
+    const loanMonthly  = Math.round(loanInterest / pl.termMonths);
     return {
       investProfit: inv.profit,
       investMonthly: inv.monthly,
-      investRatePct: (inv.r * 100).toFixed(2) + '%',
       finalAmount: P + inv.profit,
-      loanAmount, loanInterest
+      loanAmount, loanMonthly
     };
   }
   function calcUpfront(P){
     const pl = plans.upfront;
     const r = proratedByMonths(pl.apr, pl.termMonths);
     const upfrontInterest = Math.round(P * r);
+    const monthly = Math.round(upfrontInterest / pl.termMonths);
     return {
-      ratePct: (r * 100).toFixed(2) + '%',
-      upfrontInterest,
-      maturityReturn: P
+      monthly, total: upfrontInterest, finalAtMaturity: P
     };
   }
 
-  // ---------- Show result ----------
+  // ---------- Show result (STRICT templates) ----------
   function calculate(){
     const key = document.getElementById('plan').value;
     const p = plans[key];
@@ -324,46 +323,44 @@
     if (p.type === 'termYield') {
       const out = calcTermYield(amount, p.termYield);
       html = `
-        <div>
-          مدت: ${p.termMonths} ماهه<br/>
-          سود ماهانه: ${formatNumber(out.monthly)} تومان<br/>
-          سود کل: ${formatNumber(out.profit)} تومان<br/>
-          مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
-        </div>`;
+مدت: ${p.termMonths} ماهه
+سود ماهانه: ${formatNumber(out.monthly)} تومان
+سود کل: ${formatNumber(out.profit)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
+`;
     } else if (p.type === 'dailyAPR_withLoan') {
       const out = calcCreditPlan(amount);
       html = `
-        <div>
-          مدت: ${p.termMonths} ماهه • نرخ مؤثر دوره سرمایه‌گذاری: ${out.investRatePct}<br/>
-          سود ماهانه سرمایه‌گذاری: ${formatNumber(out.investMonthly)} تومان<br/>
-          سود کل سرمایه‌گذاری: ${formatNumber(out.investProfit)} تومان<br/>
-          ارزش تقریبی سرمایه در سررسید: ${formatNumber(out.finalAmount)} تومان
-          <hr/>
-          وام قابل دریافت (۱/۳ سرمایه): ${formatNumber(out.loanAmount)} تومان<br/>
-          بهره تقریبی وام طی دوره: ${formatNumber(out.loanInterest)} تومان
-        </div>`;
+مدت: ${p.termMonths} ماهه
+سود ماهانه: ${formatNumber(out.investMonthly)} تومان
+سود کل: ${formatNumber(out.investProfit)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
+---------------------------------
+اعتبار دریافتی : ${formatNumber(out.loanAmount)} تومان
+سود ماهانه اعتبار : ${formatNumber(out.loanMonthly)} تومان
+`;
     } else if (p.type === 'dailyAPR_flexible') {
       const apr = Math.min(Math.max(parseFloat(document.getElementById('vipAPR').value), p.minAPR), p.maxAPR);
       const out = calcDailyAPR(amount, apr, months);
       html = `
-        <div>
-          مدت: ${months} ماهه • APR سالانه (روزشمار): ${(apr*100).toFixed(2)}%<br/>
-          نرخ مؤثر دوره ≈ ${(out.r*100).toFixed(2)}%<br/>
-          سود ماهانه: ${formatNumber(out.monthly)} تومان<br/>
-          سود کل: ${formatNumber(out.profit)} تومان<br/>
-          مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
-        </div>`;
+مدت: ${months} ماهه
+سود ماهانه: ${formatNumber(out.monthly)} تومان
+سود کل: ${formatNumber(out.profit)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
+`;
     } else if (p.type === 'dailyAPR_upfront') {
       const out = calcUpfront(amount);
       html = `
-        <div>
-          مدت: ${p.termMonths} ماهه • نرخ مؤثر دوره ≈ ${out.ratePct}<br/>
-          <b>سود قابل پرداخت در روز اول: ${formatNumber(out.upfrontInterest)} تومان</b><br/>
-          بازگشت اصل سرمایه در سررسید: ${formatNumber(out.maturityReturn)} تومان
-        </div>`;
+مدت: ${p.termMonths} ماهه
+سود ماهانه: ${formatNumber(out.monthly)} تومان
+سود کل: ${formatNumber(out.total)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAtMaturity)} تومان
+`;
     }
 
-    document.getElementById('result').innerHTML = html;
+    // place plain text (no extra info)
+    document.getElementById('result').textContent = html.trim();
+
     updateCounter(); // شمارنده را بالا ببر
   }
 
