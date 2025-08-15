@@ -1,233 +1,100 @@
-<!DOCTYPE html><html lang="fa">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: IranSans, sans-serif;
-      direction: rtl;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      color: #2d0c59;
-    }
-    .container {
-      max-width: 420px;
-      background: #fff;
-      margin: 30px auto;
-      padding: 30px;
-      border-radius: 25px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.06);
-    }
-    img.logo { width: 90px; margin-bottom: 10px; }
-    h1 { font-size: 22px; margin: 10px 0; }
-    p { font-size: 14px; margin-bottom: 20px; }
-    select, input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      font-size: 15px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      text-align: right;
-      box-sizing: border-box;
-    }
-    input { direction: ltr; }
-    button {
-      background-color: #121212;
-      color: #fff;
-      border: none;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      width: 100%;
-      margin: 8px 0 16px;
-    }
-    button:active { transform: translateY(1px); }
-    .result {
-      background-color: #fafafa;
-      padding: 18px;
-      border-radius: 14px;
-      text-align: right;
-      line-height: 1.9;
-    }
-    .usage-counter {
-      margin-top: 24px;
-      font-size: 14px;
-      color: #555;
-    }
-    .error { color: #d33; font-size: 12px; text-align: right; min-height: 18px; margin: -6px 0 10px; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
-    <h1>ماشین حساب سود سرمایه‌گذاری</h1>
-    <p>مبلغ را وارد کنید، طرح و مدت را انتخاب کنید تا سود ماهانه، کل سود، کارمزد و مبلغ نهایی را ببینید.</p><div class="row">
-  <select id="plan" aria-label="انتخاب طرح" onchange="updateDurations()">
-    <option value="special" selected>🪙 طرح ویژه</option>
-    <option value="gold">🥇 طرح طلایی</option>
-    <option value="silver">🥈 طرح نقره‌ای</option>
-    <option value="bronze">🥉 طرح برنزی</option>
-  </select>
+import React, { useMemo, useState } from "react";
 
-  <select id="duration" aria-label="انتخاب مدت"></select>
+const fmt = (n) => (Number.isFinite(n) ? n.toLocaleString("en-US") : "–"); const clamp = (v, min, max) => Math.min(Math.max(v, min), max); const proratedByMonths = (apr, months) => apr * (months * 30 / 365);
+
+const COLORS = { ocean: "#4332BD", orange: "#E96742", lace: "#EBEAED", black: "#0B0B0F", };
+
+const PLANS = { gold123: { key: "gold123", name: "طلایی ۱۲۳٪", color: COLORS.orange, type: "termYield", termMonths: 24, termYield: 1.23, minPrincipal: 0, ctaHref: "https://my.repay.pro" }, credit: { key: "credit", name: "طرح اعتبار", color: COLORS.ocean, type: "dailyAPR_withLoan", termMonths: 3, investAPR: 0.25, loanAPR: 0.23, loanFactor: 1/3, minPrincipal: 15_000_000, ctaHref: "https://my.repay.pro" }, vip: { key: "vip", name: "VIP", color: COLORS.black, type: "dailyAPR_flexible", maxAPR: 0.61, minAPR: 0.01, minMonths: 1, maxMonths: 36, minPrincipal: 0, ctaHref: "https://my.repay.pro" }, upfront: { key: "upfront", name: "سود یکجا", color: COLORS.orange, type: "dailyAPR_upfront", termMonths: 5, apr: 0.42, minPrincipal: 10_000_000, ctaHref: "https://my.repay.pro" }, };
+
+const calcTermYield = (P, termYield) => ({ fv: P * (1 + termYield), profit: P * termYield }); const calcDailyAPR = (P, apr, months) => { const r = proratedByMonths(apr, months); return { fv: P * (1 + r), r, profit: P * r }; }; const calcCreditPlan = (P, investAPR, loanAPR, months, loanFactor) => { const { fv, r, profit } = calcDailyAPR(P, investAPR, months); const loanAmount = P * loanFactor; const loanInterest = loanAmount * proratedByMonths(loanAPR, months); return { fv, investRateProrated: r, profit, loanAmount, loanInterest }; }; const calcUpfront = (P, apr, months) => { const r = proratedByMonths(apr, months); const upfrontInterest = P * r; return { r, upfrontInterest, maturityReturn: P }; };
+
+function AppDownloadMenu() { const [open, setOpen] = useState(false); return ( <div className="relative inline-block text-left"> <button onClick={() => setOpen(!open)} className="px-4 py-2 rounded-2xl shadow bg-black text-white text-sm">دانلود اپلیکیشن</button> {open && ( <div className="absolute z-20 mt-2 w-56 rounded-2xl border bg-white shadow-lg p-2"> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="https://my.repay.pro" target="_blank" rel="noreferrer">وب اپلیکیشن</a> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="http://cafebazaar.ir/app/?id=io.rebix.pay&ref=share" target="_blank" rel="noreferrer">کافه بازار</a> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="https://myket.ir/app/io.rebix.pay" target="_blank" rel="noreferrer">مایکت</a> </div> )} </div> ); }
+
+export default function RepayCalculator_New() { const [active, setActive] = useState("gold123"); const [principal, setPrincipal] = useState(50_000_000); const [vipMonths, setVipMonths] = useState(12); const [vipAPR, setVipAPR] = useState(0.3); const plan = PLANS[active]; const minOk = principal >= (plan.minPrincipal || 0);
+
+const outputs = useMemo(() => { switch (plan.type) { case "termYield": return calcTermYield(principal, plan.termYield); case "dailyAPR_withLoan": return calcCreditPlan(principal, plan.investAPR, plan.loanAPR, plan.termMonths, plan.loanFactor); case "dailyAPR_upfront": return calcUpfront(principal, plan.apr, plan.termMonths); case "dailyAPR_flexible": return calcDailyAPR(principal, vipAPR, vipMonths); default: return {}; } }, [plan, principal, vipAPR, vipMonths]);
+
+return ( <div className="min-h-screen w-full bg-[#EBEAED] text-gray-900 p-4 md:p-8"> <div className="max-w-5xl mx-auto"> <header className="flex items-center justify-between mb-6"> <div> <h1 className="text-2xl md:text-3xl font-bold">ماشین‌حساب سود ریپی – نسخه محصولات جدید</h1> <p className="text-sm md:text-base text-gray-600 mt-1">غیرفعال‌سازی برنزی و نقره‌ای، حفظ طلایی ۱۲۳٪، افزودن طرح اعتبار، VIP و سود یکجا.</p> </div> <AppDownloadMenu /> </header>
+
+<div className="flex flex-wrap gap-2 mb-4">
+      {Object.values(PLANS).map((p) => (
+        <button key={p.key} onClick={() => setActive(p.key)}
+          className={`px-4 py-2 rounded-2xl border shadow-sm text-sm transition ${active === p.key ? "ring-2 ring-offset-2" : "opacity-80"}`}
+          style={{ borderColor: p.color, color: p.color }}>{p.name}</button>
+      ))}
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      <section className="bg-white rounded-2xl shadow p-4 md:p-6">
+        <label>
+          <span className="block text-sm mb-1">سرمایه (ریال){plan.minPrincipal > 0 && <em className="text-xs text-gray-500"> — حداقل {fmt(plan.minPrincipal)}</em>}</span>
+          <input type="number" value={principal} min={0} onChange={(e) => setPrincipal(clamp(parseFloat(e.target.value || "0"), 0, 1e15))} className="w-full border rounded-xl px-3 py-2" />
+        </label>
+
+        {plan.type === "dailyAPR_flexible" && (
+          <>
+            <label>
+              <span className="block text-sm mb-1">مدت (ماه)</span>
+              <input type="range" min={plan.minMonths} max={plan.maxMonths} value={vipMonths} onChange={(e) => setVipMonths(parseInt(e.target.value))} className="w-full" />
+              <div className="text-xs text-gray-600 mt-1">{vipMonths} ماه</div>
+            </label>
+            <label>
+              <span className="block text-sm mb-1">APR سالانه (روزشمار)</span>
+              <input type="range" min={plan.minAPR} max={plan.maxAPR} step={0.01} value={vipAPR} onChange={(e) => setVipAPR(parseFloat(e.target.value))} className="w-full" />
+              <div className="text-xs text-gray-600 mt-1">{(vipAPR * 100).toFixed(2)}%</div>
+            </label>
+          </>
+        )}
+      </section>
+
+      <section className="bg-white rounded-2xl shadow p-4 md:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="text-lg font-semibold" style={{ color: plan.color }}>{plan.name}</div>
+          </div>
+          <a className="text-xs px-2 py-1 rounded-full" href={plan.ctaHref} target="_blank" rel="noreferrer" style={{ background: plan.color + "20", color: plan.color }}>Repay</a>
+        </div>
+
+        {!minOk ? (
+          <div className="rounded-xl bg-[#FFF6F6] border border-red-200 p-3 text-sm text-red-700">حداقل مبلغ این طرح {fmt(plan.minPrincipal)} ریال است.</div>
+        ) : (
+          <>
+            {plan.type === "termYield" && (
+              <>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">ارزش نهایی</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود کل</div><div className="text-xl font-bold">{fmt(outputs.profit)} ریال</div></div>
+              </>
+            )}
+            {plan.type === "dailyAPR_withLoan" && (
+              <>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سرمایه + سود</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">وام</div><div className="text-xl font-bold">{fmt(outputs.loanAmount)} ریال</div></div>
+                  <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">بهره وام</div><div className="text-xl font-bold">{fmt(outputs.loanInterest)} ریال</div></div>
+                </div>
+              </>
+            )}
+            {plan.type === "dailyAPR_flexible" && (
+              <>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">ارزش نهایی</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود</div><div className="text-xl font-bold">{fmt(outputs.profit)} ریال</div></div>
+              </>
+            )}
+            {plan.type === "dailyAPR_upfront" && (
+              <>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود روز اول</div><div className="text-xl font-bold">{fmt(outputs.upfrontInterest)} ریال</div></div>
+                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">اصل سرمایه در سررسید</div><div className="text-xl font-bold">{fmt(outputs.maturityReturn)} ریال</div></div>
+              </>
+            )}
+            <a href={plan.ctaHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white shadow" style={{ background: plan.color }}>همین الان شروع کن</a>
+          </>
+        )}
+      </section>
+    </div>
+
+    <footer className="mt-8 text-center text-xs text-gray-500">Ocean Blue (#4332BD)، Chinese Orange (#E96742)، Lace Cap (#EBEAED) | my.repay.pro</footer>
+  </div>
 </div>
 
-<input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="حداقل مبلغ ۲۵٬۰۰۰٬۰۰۰ تومان" />
-<div id="amountError" class="error"></div>
+); }
 
-<button id="calcBtn" type="button" onclick="calculateProfit()">محاسبه</button>
-
-<div class="result" id="result" aria-live="polite"></div>
-
-<div class="usage-counter">📊 count : <span id="useCount">0</span></div>
-
-  </div>  <script>
-    // ----- تنظیمات طرح‌ها -----
-    // NOTE: در صورت نیاز، مقدار min و feePercent برای طرح ویژه را به‌راحتی تغییر دهید
-    const plans = {
-      special: { min: 5000000, feePercent: 2, profits: { '12': 61 } }, // 🪙 طرح ویژه (فرض: حداقل مانند طلایی، کارمزد ۲٪)
-      gold:    { min: 25000000, feePercent: 2, profits: { '3': 13, '6': 27, '12': 59, '24': 123 } },
-      silver:  { min: 10000000, feePercent: 1, profits: { '3': 9,  '6': 20, '12': 52, '24': 114 } },
-      bronze:  { min:  5000000, feePercent: 0, profits: { '3': 6,  '6': 15, '12': 36, '24': 96 } }
-    };
-
-    // قالب‌بندی عددی بومی
-    const nfFA = new Intl.NumberFormat('fa-IR');
-
-    function formatNumber(n){ return nfFA.format(n); }
-
-    function normalizeDigits(str){
-      // تبدیل ارقام فارسی/عربی به لاتین برای محاسبات
-      const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
-      return (str || '').replace(/[\u06F0-\u06F9\u0660-\u0669]/g, d => {
-        const i = fa.indexOf(d);
-        if (i > -1) return String(i);
-        const j = ar.indexOf(d);
-        if (j > -1) return String(j);
-        return d;
-      });
-    }
-
-    function numberFromInput(val){
-      const normalized = normalizeDigits(val);
-      const raw = normalized.replace(/[^\d]/g, '');
-      return raw ? parseInt(raw, 10) : NaN;
-    }
-
-    function formatInputAmount(e){
-      const input = e.target;
-      const n = numberFromInput(input.value);
-      if (Number.isNaN(n)) { input.value = ''; return; }
-      input.value = formatNumber(n);
-    }
-
-    function setError(msg){
-      document.getElementById('amountError').textContent = msg || '';
-    }
-
-    function updateDurations(){
-      const planKey = document.getElementById('plan').value;
-      const durations = plans[planKey].profits;
-      const select = document.getElementById('duration');
-      select.innerHTML = '';
-      for (const [months, percent] of Object.entries(durations)){
-        const option = document.createElement('option');
-        option.value = months;
-        option.textContent = `${months} ماهه – ${percent}%`;
-        select.appendChild(option);
-      }
-      // پیش‌فرض: اگر 24 ماه موجود است، همان را انتخاب کن؛ وگرنه آخرین گزینه
-      const has24 = Object.keys(durations).includes('24');
-      select.value = has24 ? '24' : Object.keys(durations).at(-1);
-
-      // به‌روزرسانی placeholder حداقل مبلغ
-      const min = plans[planKey].min;
-      document.getElementById('amount').placeholder = `حداقل مبلغ ${formatNumber(min)} تومان`;
-
-      // پاک‌کردن خطای قبلی و نتیجه
-      setError('');
-      document.getElementById('result').innerHTML = '';
-    }
-
-    function calculateProfit(){
-      const planKey = document.getElementById('plan').value;
-      const months = document.getElementById('duration').value;
-      const amountVal = document.getElementById('amount').value;
-      const amount = numberFromInput(amountVal);
-      const plan = plans[planKey];
-
-      if (Number.isNaN(amount)){
-        setError('مبلغ را وارد کنید.');
-        return;
-      }
-      if (amount < plan.min){
-        setError(`حداقل مبلغ برای ${document.getElementById('plan').selectedOptions[0].text} ${formatNumber(plan.min)} تومان است.`);
-        return;
-      }
-      setError('');
-
-      const percent = plan.profits[months];
-      const totalProfit = Math.round((amount * percent) / 100);
-      const monthlyProfit = Math.round(totalProfit / parseInt(months, 10));
-      const fee = Math.round((plan.feePercent / 100) * (amount + totalProfit));
-      const finalAmount = amount + totalProfit - fee;
-      const feeText = plan.feePercent === 0 ? 'بدون کارمزد' : `${formatNumber(plan.feePercent)}٪`;
-
-      document.getElementById('result').innerHTML = `
-        <div>
-          سود ماهانه: ${formatNumber(monthlyProfit)} تومان<br />
-          سود کل: ${formatNumber(totalProfit)} تومان<br />
-          کارمزد: ${feeText}<br />
-          مبلغ قابل برداشت نهایی: ${formatNumber(finalAmount)} تومان
-        </div>`;
-
-      updateCounter();
-    }
-
-    // ----- شمارنده با Google Apps Script (همان نسخه شما) -----
-    const COUNTER_NS  = 'repay_calc';
-    const COUNTER_KEY = 'usage_count';
-    const API_BASE = 'https://script.google.com/macros/s/AKfycbxkeNkd__in37pKasVS0lhD7ffK7iB2dxS1A7hSgY8R9TngJLjfRwcIp4kuowDs7O-4/exec';
-
-    const URL_GET = `${API_BASE}?op=get&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
-    const URL_HIT = `${API_BASE}?op=hit&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
-
-    function jsonp(url){
-      return new Promise((resolve, reject) => {
-        const cb = 'cb_' + Math.random().toString(36).slice(2);
-        window[cb] = data => { resolve(data); cleanup(); };
-        const s = document.createElement('script');
-        s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-        s.onerror = () => { reject(); cleanup(); };
-        document.body.appendChild(s);
-        function cleanup(){ delete window[cb]; s.remove(); }
-      });
-    }
-
-    function setCount(v){ document.getElementById('useCount').innerText = (v ?? 0); }
-
-    function getCurrentCount(){
-      jsonp(URL_GET).then(d => setCount(d.value)).catch(() => setCount(0));
-    }
-
-    function updateCounter(){
-      const el = document.getElementById('useCount');
-      el.innerText = (parseInt(el.innerText || '0', 10) + 1);
-      jsonp(URL_HIT).then(d => setCount(d.value)).catch(() => {});
-    }
-
-    // ----- init -----
-    document.getElementById('amount').addEventListener('input', formatInputAmount);
-    document.addEventListener('DOMContentLoaded', () => {
-      // پیش‌فرض طرح ویژه
-      document.getElementById('plan').value = 'special';
-      updateDurations();
-      getCurrentCount();
-    });
-  </script></body>
-</html>
