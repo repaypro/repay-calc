@@ -37,7 +37,8 @@
     .mini { font-size: 12px; color: #666; }
 
     .result {
-      background-color: #fafafa; padding: 18px; border-radius: 14px; text-align: right; line-height: 1.9;
+      background-color: #fafafa; padding: 18px; border-radius: 14px; text-align: right;
+      line-height: 1.9; white-space: pre-line;  /* مهم: خطوط خروجی دقیق نمایش داده شوند */
     }
     .error { color: #d33; font-size: 12px; text-align: right; min-height: 18px; margin: -6px 0 10px; }
     .usage-counter { margin-top: 10px; font-size: 14px; color: #555; }
@@ -319,49 +320,47 @@
       ? parseInt(document.getElementById('vipMonths').value, 10)
       : parseInt(document.getElementById('duration').value, 10);
 
-    let html = '';
+    let text = '';
     if (p.type === 'termYield') {
       const out = calcTermYield(amount, p.termYield);
-      html = `
-مدت: ${p.termMonths} ماهه
+      text =
+`مدت: ${p.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل: ${formatNumber(out.profit)} تومان
-مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
-`;
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
     } else if (p.type === 'dailyAPR_withLoan') {
       const out = calcCreditPlan(amount);
-      html = `
-مدت: ${p.termMonths} ماهه
+      // نسخه مرتب و منظم طبق قالب خواسته‌شده
+      text =
+`مدت: ${p.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.investMonthly)} تومان
 سود کل: ${formatNumber(out.investProfit)} تومان
 مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
 ---------------------------------
 اعتبار دریافتی : ${formatNumber(out.loanAmount)} تومان
-سود ماهانه اعتبار : ${formatNumber(out.loanMonthly)} تومان
-`;
+سود ماهانه اعتبار : ${formatNumber(out.loanMonthly)} تومان`;
     } else if (p.type === 'dailyAPR_flexible') {
       const apr = Math.min(Math.max(parseFloat(document.getElementById('vipAPR').value), p.minAPR), p.maxAPR);
       const out = calcDailyAPR(amount, apr, months);
-      html = `
-مدت: ${months} ماهه
+      text =
+`مدت: ${months} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل: ${formatNumber(out.profit)} تومان
-مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
-`;
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
     } else if (p.type === 'dailyAPR_upfront') {
       const out = calcUpfront(amount);
-      html = `
-مدت: ${p.termMonths} ماهه
+      text =
+`مدت: ${p.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل: ${formatNumber(out.total)} تومان
-مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAtMaturity)} تومان
-`;
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAtMaturity)} تومان`;
     }
 
-    // place plain text (no extra info)
-    document.getElementById('result').textContent = html.trim();
+    // نمایش دقیق همان قالب (بدون اطلاعات اضافه)
+    const resultEl = document.getElementById('result');
+    resultEl.textContent = text;
 
-    updateCounter(); // شمارنده را بالا ببر
+    updateCounter(); // شمارنده
   }
 
   // ---------- Counter (GAS JSONP) ----------
