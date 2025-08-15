@@ -1,100 +1,387 @@
-import React, { useMemo, useState } from "react";
+<!DOCTYPE html><html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ماشین‌حساب سود ریپی (نسخه جدید)</title>
+  <style>
+    body {
+      font-family: IranSans, sans-serif;
+      direction: rtl;
+      background-color: #f5f5f5;
+      margin: 0; padding: 0; color: #2d0c59; text-align: center;
+    }
+    .container {
+      max-width: 460px; background: #fff; margin: 30px auto; padding: 26px;
+      border-radius: 25px; box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    }
+    img.logo { width: 90px; margin-bottom: 10px; }
+    h1 { font-size: 22px; margin: 10px 0; }
+    p { font-size: 14px; margin-bottom: 16px; line-height: 1.8; }
 
-const fmt = (n) => (Number.isFinite(n) ? n.toLocaleString("en-US") : "–"); const clamp = (v, min, max) => Math.min(Math.max(v, min), max); const proratedByMonths = (apr, months) => apr * (months * 30 / 365);
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
 
-const COLORS = { ocean: "#4332BD", orange: "#E96742", lace: "#EBEAED", black: "#0B0B0F", };
+    select, input[type="text"], input[type="number"] {
+      width: 100%; padding: 12px; margin-bottom: 12px; font-size: 15px;
+      border-radius: 12px; border: 1px solid #ccc; text-align: right; box-sizing: border-box;
+    }
+    input[type="text"] { direction: ltr; }
+    input[type="range"] { width: 100%; }
 
-const PLANS = { gold123: { key: "gold123", name: "طلایی ۱۲۳٪", color: COLORS.orange, type: "termYield", termMonths: 24, termYield: 1.23, minPrincipal: 0, ctaHref: "https://my.repay.pro" }, credit: { key: "credit", name: "طرح اعتبار", color: COLORS.ocean, type: "dailyAPR_withLoan", termMonths: 3, investAPR: 0.25, loanAPR: 0.23, loanFactor: 1/3, minPrincipal: 15_000_000, ctaHref: "https://my.repay.pro" }, vip: { key: "vip", name: "VIP", color: COLORS.black, type: "dailyAPR_flexible", maxAPR: 0.61, minAPR: 0.01, minMonths: 1, maxMonths: 36, minPrincipal: 0, ctaHref: "https://my.repay.pro" }, upfront: { key: "upfront", name: "سود یکجا", color: COLORS.orange, type: "dailyAPR_upfront", termMonths: 5, apr: 0.42, minPrincipal: 10_000_000, ctaHref: "https://my.repay.pro" }, };
+    button {
+      background-color: #121212; color: #fff; border: none; padding: 14px; font-size: 16px;
+      border-radius: 12px; cursor: pointer; width: 100%; margin: 8px 0 16px;
+    }
+    button:active { transform: translateY(1px); }
 
-const calcTermYield = (P, termYield) => ({ fv: P * (1 + termYield), profit: P * termYield }); const calcDailyAPR = (P, apr, months) => { const r = proratedByMonths(apr, months); return { fv: P * (1 + r), r, profit: P * r }; }; const calcCreditPlan = (P, investAPR, loanAPR, months, loanFactor) => { const { fv, r, profit } = calcDailyAPR(P, investAPR, months); const loanAmount = P * loanFactor; const loanInterest = loanAmount * proratedByMonths(loanAPR, months); return { fv, investRateProrated: r, profit, loanAmount, loanInterest }; }; const calcUpfront = (P, apr, months) => { const r = proratedByMonths(apr, months); const upfrontInterest = P * r; return { r, upfrontInterest, maturityReturn: P }; };
+    .btn-secondary {
+      background: #4332BD; /* Ocean Blue */
+    }
 
-function AppDownloadMenu() { const [open, setOpen] = useState(false); return ( <div className="relative inline-block text-left"> <button onClick={() => setOpen(!open)} className="px-4 py-2 rounded-2xl shadow bg-black text-white text-sm">دانلود اپلیکیشن</button> {open && ( <div className="absolute z-20 mt-2 w-56 rounded-2xl border bg-white shadow-lg p-2"> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="https://my.repay.pro" target="_blank" rel="noreferrer">وب اپلیکیشن</a> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="http://cafebazaar.ir/app/?id=io.rebix.pay&ref=share" target="_blank" rel="noreferrer">کافه بازار</a> <a className="block px-3 py-2 rounded-xl hover:bg-gray-100 text-sm" href="https://myket.ir/app/io.rebix.pay" target="_blank" rel="noreferrer">مایکت</a> </div> )} </div> ); }
+    .mini { font-size: 12px; color: #666; }
 
-export default function RepayCalculator_New() { const [active, setActive] = useState("gold123"); const [principal, setPrincipal] = useState(50_000_000); const [vipMonths, setVipMonths] = useState(12); const [vipAPR, setVipAPR] = useState(0.3); const plan = PLANS[active]; const minOk = principal >= (plan.minPrincipal || 0);
+    .result {
+      background-color: #fafafa; padding: 18px; border-radius: 14px; text-align: right; line-height: 1.9;
+    }
 
-const outputs = useMemo(() => { switch (plan.type) { case "termYield": return calcTermYield(principal, plan.termYield); case "dailyAPR_withLoan": return calcCreditPlan(principal, plan.investAPR, plan.loanAPR, plan.termMonths, plan.loanFactor); case "dailyAPR_upfront": return calcUpfront(principal, plan.apr, plan.termMonths); case "dailyAPR_flexible": return calcDailyAPR(principal, vipAPR, vipMonths); default: return {}; } }, [plan, principal, vipAPR, vipMonths]);
+    .error { color: #d33; font-size: 12px; text-align: right; min-height: 18px; margin: -6px 0 10px; }
 
-return ( <div className="min-h-screen w-full bg-[#EBEAED] text-gray-900 p-4 md:p-8"> <div className="max-w-5xl mx-auto"> <header className="flex items-center justify-between mb-6"> <div> <h1 className="text-2xl md:text-3xl font-bold">ماشین‌حساب سود ریپی – نسخه محصولات جدید</h1> <p className="text-sm md:text-base text-gray-600 mt-1">غیرفعال‌سازی برنزی و نقره‌ای، حفظ طلایی ۱۲۳٪، افزودن طرح اعتبار، VIP و سود یکجا.</p> </div> <AppDownloadMenu /> </header>
+    .usage-counter { margin-top: 16px; font-size: 14px; color: #555; }
 
-<div className="flex flex-wrap gap-2 mb-4">
-      {Object.values(PLANS).map((p) => (
-        <button key={p.key} onClick={() => setActive(p.key)}
-          className={`px-4 py-2 rounded-2xl border shadow-sm text-sm transition ${active === p.key ? "ring-2 ring-offset-2" : "opacity-80"}`}
-          style={{ borderColor: p.color, color: p.color }}>{p.name}</button>
-      ))}
+    .download-wrap { position: relative; display: inline-block; }
+    .download-menu {
+      position: absolute; top: 110%; inset-inline-end: 0; width: 240px; background: #fff; border: 1px solid #eee;
+      border-radius: 14px; box-shadow: 0 10px 24px rgba(0,0,0,.08); padding: 6px; text-align: right; z-index: 10;
+    }
+    .download-menu a { display: block; padding: 10px 12px; border-radius: 10px; color: #222; text-decoration: none; }
+    .download-menu a:hover { background: #f6f6f6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
+    <h1>ماشین‌حساب سود سرمایه‌گذاری</h1>
+    <p>طرح دلخواه را انتخاب کنید. مبلغ را وارد کنید تا سود، جزئیات و دکمه شروع سریع نمایش داده شود.</p>
+
+    <!-- دکمه دانلود اپلیکیشن -->
+    <div class="download-wrap" style="margin-bottom:14px;">
+      <button class="btn-secondary" id="downloadBtn" type="button">دانلود اپلیکیشن</button>
+      <div id="downloadMenu" class="download-menu" style="display:none;">
+        <a href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">وب اپلیکیشن</a>
+        <a href="http://cafebazaar.ir/app/?id=io.rebix.pay&ref=share" target="_blank" rel="noreferrer noopener">کافه بازار</a>
+        <a href="https://myket.ir/app/io.rebix.pay" target="_blank" rel="noreferrer noopener">مایکت</a>
+      </div>
     </div>
 
-    <div className="grid md:grid-cols-2 gap-6">
-      <section className="bg-white rounded-2xl shadow p-4 md:p-6">
-        <label>
-          <span className="block text-sm mb-1">سرمایه (ریال){plan.minPrincipal > 0 && <em className="text-xs text-gray-500"> — حداقل {fmt(plan.minPrincipal)}</em>}</span>
-          <input type="number" value={principal} min={0} onChange={(e) => setPrincipal(clamp(parseFloat(e.target.value || "0"), 0, 1e15))} className="w-full border rounded-xl px-3 py-2" />
-        </label>
+    <div class="row">
+      <select id="plan" aria-label="انتخاب طرح" onchange="onPlanChange()">
+        <option value="gold123" selected>🥇 طلایی ۱۲۳٪</option>
+        <option value="credit">💳 طرح اعتبار</option>
+        <option value="vip">⭐ VIP (اختیاری)</option>
+        <option value="upfront">💠 سود یکجا</option>
+      </select>
 
-        {plan.type === "dailyAPR_flexible" && (
-          <>
-            <label>
-              <span className="block text-sm mb-1">مدت (ماه)</span>
-              <input type="range" min={plan.minMonths} max={plan.maxMonths} value={vipMonths} onChange={(e) => setVipMonths(parseInt(e.target.value))} className="w-full" />
-              <div className="text-xs text-gray-600 mt-1">{vipMonths} ماه</div>
-            </label>
-            <label>
-              <span className="block text-sm mb-1">APR سالانه (روزشمار)</span>
-              <input type="range" min={plan.minAPR} max={plan.maxAPR} step={0.01} value={vipAPR} onChange={(e) => setVipAPR(parseFloat(e.target.value))} className="w-full" />
-              <div className="text-xs text-gray-600 mt-1">{(vipAPR * 100).toFixed(2)}%</div>
-            </label>
-          </>
-        )}
-      </section>
-
-      <section className="bg-white rounded-2xl shadow p-4 md:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="text-lg font-semibold" style={{ color: plan.color }}>{plan.name}</div>
-          </div>
-          <a className="text-xs px-2 py-1 rounded-full" href={plan.ctaHref} target="_blank" rel="noreferrer" style={{ background: plan.color + "20", color: plan.color }}>Repay</a>
-        </div>
-
-        {!minOk ? (
-          <div className="rounded-xl bg-[#FFF6F6] border border-red-200 p-3 text-sm text-red-700">حداقل مبلغ این طرح {fmt(plan.minPrincipal)} ریال است.</div>
-        ) : (
-          <>
-            {plan.type === "termYield" && (
-              <>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">ارزش نهایی</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود کل</div><div className="text-xl font-bold">{fmt(outputs.profit)} ریال</div></div>
-              </>
-            )}
-            {plan.type === "dailyAPR_withLoan" && (
-              <>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سرمایه + سود</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">وام</div><div className="text-xl font-bold">{fmt(outputs.loanAmount)} ریال</div></div>
-                  <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">بهره وام</div><div className="text-xl font-bold">{fmt(outputs.loanInterest)} ریال</div></div>
-                </div>
-              </>
-            )}
-            {plan.type === "dailyAPR_flexible" && (
-              <>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">ارزش نهایی</div><div className="text-xl font-bold">{fmt(outputs.fv)} ریال</div></div>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود</div><div className="text-xl font-bold">{fmt(outputs.profit)} ریال</div></div>
-              </>
-            )}
-            {plan.type === "dailyAPR_upfront" && (
-              <>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">سود روز اول</div><div className="text-xl font-bold">{fmt(outputs.upfrontInterest)} ریال</div></div>
-                <div className="rounded-xl bg-[#EBEAED] p-3"><div className="text-xs text-gray-500">اصل سرمایه در سررسید</div><div className="text-xl font-bold">{fmt(outputs.maturityReturn)} ریال</div></div>
-              </>
-            )}
-            <a href={plan.ctaHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white shadow" style={{ background: plan.color }}>همین الان شروع کن</a>
-          </>
-        )}
-      </section>
+      <!-- برای طرح‌هایی که مدت ثابت دارند از این استفاده می‌کنیم -->
+      <select id="duration" aria-label="انتخاب مدت"></select>
     </div>
 
-    <footer className="mt-8 text-center text-xs text-gray-500">Ocean Blue (#4332BD)، Chinese Orange (#E96742)، Lace Cap (#EBEAED) | my.repay.pro</footer>
+    <!-- کنترل‌های اختصاصی VIP -->
+    <div id="vipControls" style="display:none; text-align:right; margin-top:-6px;">
+      <label class="mini">مدت (ماه)</label>
+      <input id="vipMonths" type="range" min="1" max="36" value="12" oninput="document.getElementById('vipMonthsVal').innerText=this.value">
+      <div class="mini">مدت انتخابی: <b><span id="vipMonthsVal">12</span> ماه</b></div>
+
+      <label class="mini" style="margin-top:8px;">APR سالانه (روزشمار) — سقف ۶۱٪</label>
+      <input id="vipAPR" type="range" min="0.01" max="0.61" step="0.01" value="0.30"
+             oninput="document.getElementById('vipAPRVal').innerText=(this.value*100).toFixed(2)+'%'">
+      <div class="mini">APR انتخابی: <b><span id="vipAPRVal">30.00%</span></b></div>
+    </div>
+
+    <input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" />
+    <div id="amountError" class="error"></div>
+
+    <button id="calcBtn" type="button" onclick="calculate()">محاسبه</button>
+
+    <div class="result" id="result" aria-live="polite"></div>
+
+    <a id="ctaStart" href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">
+      <button type="button">همین الان شروع کن</button>
+    </a>
+
+    <div class="usage-counter">📊 count : <span id="useCount">0</span></div>
   </div>
-</div>
 
-); }
+<script>
+  // ---------- تنظیمات طرح‌ها (بر اساس نیاز جدید) ----------
+  // واحد مبلغ: تومان
+  const plans = {
+    gold123: {
+      label: "طلایی ۱۲۳٪",
+      min: 0,          // حداقل ذکر نشده؛ اگر خواستی تغییر بده
+      type: "termYield",
+      termMonths: 24,
+      termYield: 1.23, // سود کل دوره
+    },
+    credit: {
+      label: "طرح اعتبار",
+      min: 15000000,
+      type: "dailyAPR_withLoan",
+      termMonths: 3,
+      investAPR: 0.25, // سالانه روزشمار
+      loanAPR: 0.23,   // سالانه روزشمار
+      loanFactor: 1/3, // یک سوم سرمایه
+    },
+    vip: {
+      label: "VIP",
+      min: 0,
+      type: "dailyAPR_flexible",
+      maxAPR: 0.61,
+      minAPR: 0.01,
+      minMonths: 1,
+      maxMonths: 36,
+    },
+    upfront: {
+      label: "سود یکجا",
+      min: 10000000,
+      type: "dailyAPR_upfront",
+      termMonths: 5,
+      apr: 0.42,       // سالانه روزشمار
+    },
+  };
 
+  // ---------- قالب‌بندی اعداد ----------
+  const nfFA = new Intl.NumberFormat('fa-IR');
+  const formatNumber = (n) => nfFA.format(n);
+
+  function normalizeDigits(str){
+    const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
+    return (str || '').replace(/[\u06F0-\u06F9\u0660-\u0669]/g, d => {
+      const i = fa.indexOf(d); if (i > -1) return String(i);
+      const j = ar.indexOf(d); if (j > -1) return String(j);
+      return d;
+    });
+  }
+  function numberFromInput(val){
+    const normalized = normalizeDigits(val);
+    const raw = normalized.replace(/[^\d]/g, '');
+    return raw ? parseInt(raw, 10) : NaN;
+  }
+  function formatInputAmount(e){
+    const input = e.target;
+    const n = numberFromInput(input.value);
+    if (Number.isNaN(n)) { input.value = ''; return; }
+    input.value = formatNumber(n);
+  }
+
+  function setError(msg){ document.getElementById('amountError').textContent = msg || ''; }
+
+  // ---------- روزشمار: APR سالانه → نرخ موثر دوره (ماه ۳۰ روزه) ----------
+  const proratedByMonths = (apr, months) => apr * ((months * 30) / 365);
+
+  // ---------- UI: تغییر طرح ----------
+  function onPlanChange(){
+    const planKey = document.getElementById('plan').value;
+    const p = plans[planKey];
+    const durationSel = document.getElementById('duration');
+    const vipControls = document.getElementById('vipControls');
+
+    durationSel.innerHTML = '';
+    vipControls.style.display = 'none';
+
+    if (p.type === 'termYield') {
+      // فقط ۲۴ ماهه
+      const opt = document.createElement('option');
+      opt.value = String(p.termMonths);
+      opt.textContent = `${p.termMonths} ماهه – ${Math.round(p.termYield*100)}%`;
+      durationSel.appendChild(opt);
+      durationSel.disabled = false;
+    } else if (p.type === 'dailyAPR_withLoan') {
+      // فقط ۳ ماهه (سود دوره از APR محاسبه می‌شود)
+      const m = p.termMonths;
+      const opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = `${m} ماهه`;
+      durationSel.appendChild(opt);
+      durationSel.disabled = false;
+    } else if (p.type === 'dailyAPR_upfront') {
+      // فقط ۵ ماهه
+      const m = p.termMonths;
+      const opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = `${m} ماهه – سود روز اول`;
+      durationSel.appendChild(opt);
+      durationSel.disabled = false;
+    } else if (p.type === 'dailyAPR_flexible') {
+      // VIP: کنترل‌های اختصاصی
+      vipControls.style.display = '';
+      durationSel.disabled = true;
+      // مقدارهای پیش‌فرض در خود کنترل‌های VIP است
+    }
+
+    // Placeholder حداقل
+    const minTxt = p.min > 0 ? `حداقل مبلغ ${formatNumber(p.min)} تومان` : 'مبلغ سرمایه (تومان)';
+    document.getElementById('amount').placeholder = minTxt;
+
+    // پاک‌کردن خطا و نتیجه
+    setError('');
+    document.getElementById('result').innerHTML = '';
+  }
+
+  // ---------- محاسبات هر طرح ----------
+  function calcTermYield(P, termYield){
+    const profit = Math.round(P * termYield);
+    const monthly = Math.round(profit / 24);
+    return { profit, monthly, finalAmount: P + profit };
+  }
+
+  function calcDailyAPR(P, apr, months){
+    const r = proratedByMonths(apr, months);        // نرخ دوره
+    const profit = Math.round(P * r);
+    const monthly = Math.round(profit / months);
+    return { r, profit, monthly, finalAmount: P + profit };
+  }
+
+  function calcCreditPlan(P){
+    const pl = plans.credit;
+    const inv = calcDailyAPR(P, pl.investAPR, pl.termMonths);
+    const loanAmount  = Math.round(P * pl.loanFactor);
+    const loanRate    = proratedByMonths(pl.loanAPR, pl.termMonths);
+    const loanInterest = Math.round(loanAmount * loanRate);
+    return {
+      investProfit: inv.profit,
+      investMonthly: inv.monthly,
+      investRatePct: (inv.r * 100).toFixed(2) + '%',
+      finalAmount: P + inv.profit, // ارزش تقریبی سرمایه در سررسید
+      loanAmount, loanInterest
+    };
+  }
+
+  function calcUpfront(P){
+    const pl = plans.upfront;
+    const r = proratedByMonths(pl.apr, pl.termMonths);
+    const upfrontInterest = Math.round(P * r); // روز اول پرداخت می‌شود
+    return {
+      ratePct: (r * 100).toFixed(2) + '%',
+      upfrontInterest,
+      maturityReturn: P
+    };
+  }
+
+  // ---------- نمایش نتیجه ----------
+  function calculate(){
+    const planKey = document.getElementById('plan').value;
+    const p = plans[planKey];
+    const amount = numberFromInput(document.getElementById('amount').value);
+
+    if (Number.isNaN(amount)) { setError('مبلغ را وارد کنید.'); return; }
+    if (amount < p.min) { setError(`حداقل مبلغ برای «${p.label}» ${formatNumber(p.min)} تومان است.`); return; }
+    setError('');
+
+    const months = (p.type === 'dailyAPR_flexible')
+      ? parseInt(document.getElementById('vipMonths').value, 10)
+      : parseInt(document.getElementById('duration').value, 10);
+
+    let html = '';
+
+    if (p.type === 'termYield') {
+      const out = calcTermYield(amount, p.termYield);
+      html = `
+        <div>
+          مدت: ${p.termMonths} ماهه<br/>
+          سود ماهانه: ${formatNumber(out.monthly)} تومان<br/>
+          سود کل: ${formatNumber(out.profit)} تومان<br/>
+          مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
+        </div>
+      `;
+    } else if (p.type === 'dailyAPR_withLoan') {
+      const out = calcCreditPlan(amount);
+      html = `
+        <div>
+          مدت: ${p.termMonths} ماهه • نرخ مؤثر دوره سرمایه‌گذاری: ${out.investRatePct}<br/>
+          سود ماهانه سرمایه‌گذاری: ${formatNumber(out.investMonthly)} تومان<br/>
+          سود کل سرمایه‌گذاری: ${formatNumber(out.investProfit)} تومان<br/>
+          ارزش تقریبی سرمایه در سررسید: ${formatNumber(out.finalAmount)} تومان
+          <hr/>
+          وام قابل دریافت (۱/۳ سرمایه): ${formatNumber(out.loanAmount)} تومان<br/>
+          بهره تقریبی وام طی دوره: ${formatNumber(out.loanInterest)} تومان
+        </div>
+      `;
+    } else if (p.type === 'dailyAPR_flexible') {
+      const apr = Math.min(Math.max(parseFloat(document.getElementById('vipAPR').value), p.minAPR), p.maxAPR);
+      const out = calcDailyAPR(amount, apr, months);
+      html = `
+        <div>
+          مدت: ${months} ماهه • APR سالانه (روزشمار): ${(apr*100).toFixed(2)}%<br/>
+          نرخ مؤثر دوره ≈ ${(out.r*100).toFixed(2)}%<br/>
+          سود ماهانه: ${formatNumber(out.monthly)} تومان<br/>
+          سود کل: ${formatNumber(out.profit)} تومان<br/>
+          مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان
+        </div>
+      `;
+    } else if (p.type === 'dailyAPR_upfront') {
+      const out = calcUpfront(amount);
+      html = `
+        <div>
+          مدت: ${p.termMonths} ماهه • نرخ مؤثر دوره ≈ ${out.ratePct}<br/>
+          <b>سود قابل پرداخت در روز اول: ${formatNumber(out.upfrontInterest)} تومان</b><br/>
+          بازگشت اصل سرمایه در سررسید: ${formatNumber(out.maturityReturn)} تومان
+        </div>
+      `;
+    }
+
+    document.getElementById('result').innerHTML = html;
+    updateCounter();
+  }
+
+  // ---------- شمارنده (GAS JSONP) ----------
+  const COUNTER_NS  = 'repay_calc_v2';
+  const COUNTER_KEY = 'usage_count';
+  const API_BASE = 'https://script.google.com/macros/s/AKfycbxkeNkd__in37pKasVS0lhD7ffK7iB2dxS1A7hSgY8R9TngJLjfRwcIp4kuowDs7O-4/exec';
+  const URL_GET = `${API_BASE}?op=get&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
+  const URL_HIT = `${API_BASE}?op=hit&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
+
+  function jsonp(url){
+    return new Promise((resolve, reject) => {
+      const cb = 'cb_' + Math.random().toString(36).slice(2);
+      window[cb] = data => { resolve(data); cleanup(); };
+      const s = document.createElement('script');
+      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+      s.onerror = () => { reject(); cleanup(); };
+      document.body.appendChild(s);
+      function cleanup(){ delete window[cb]; s.remove(); }
+    });
+  }
+  function setCount(v){ document.getElementById('useCount').innerText = (v ?? 0); }
+  function getCurrentCount(){ jsonp(URL_GET).then(d => setCount(d.value)).catch(() => setCount(0)); }
+  function updateCounter(){
+    const el = document.getElementById('useCount');
+    el.innerText = (parseInt(el.innerText || '0', 10) + 1);
+    jsonp(URL_HIT).then(d => setCount(d.value)).catch(() => {});
+  }
+
+  // ---------- رویدادها ----------
+  document.getElementById('amount').addEventListener('input', formatInputAmount);
+
+  // منوی دانلود
+  (function initDownloadMenu(){
+    const btn = document.getElementById('downloadBtn');
+    const menu = document.getElementById('downloadMenu');
+    btn.addEventListener('click', () => {
+      const isOpen = menu.style.display === 'block';
+      menu.style.display = isOpen ? 'none' : 'block';
+    });
+    document.addEventListener('click', (e) => {
+      const within = e.target.closest('.download-wrap');
+      if (!within) menu.style.display = 'none';
+    });
+  })();
+
+  // مقداردهی اولیه
+  document.addEventListener('DOMContentLoaded', () => {
+    // پیش‌فرض: طلایی ۱۲۳٪
+    document.getElementById('plan').value = 'gold123';
+    onPlanChange();
+    getCurrentCount();
+  });
+</script>
+</body>
+</html>
