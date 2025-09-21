@@ -9,7 +9,9 @@
     img.logo{width:90px;margin-bottom:10px}
     h1{font-size:22px;margin:10px 0}
     p{font-size:14px;margin-bottom:16px;line-height:1.9}
+
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+    .row.onecol{grid-template-columns:1fr;} /* وقتی زیرطرح ندارد، تمام عرض */
     select,input[type="text"],input[type="number"]{width:100%;padding:12px;margin-bottom:12px;font-size:15px;border-radius:12px;border:1px solid #ccc;text-align:right;box-sizing:border-box}
     input[type="text"]{direction:ltr}
     input[type="range"]{width:100%}
@@ -32,7 +34,7 @@
     .modal-header{background-image:linear-gradient(135deg,#4332BD,#6f58ff,#E96742);color:#fff;text-align:right;padding:14px 16px}
     .modal-header .close{background:transparent;border:0;color:#fff;font-size:18px;width:auto;float:left;margin-top:-4px;cursor:pointer}
     .modal-body{padding:10px;text-align:right}
-    .option{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;border:1px solid #eee;text-decoration:none;color:#111;margin:6px 0;transition:.15s ease;background:#fff}
+    .option{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;border:1px solid #eee;text-decoration:none;color:#111;margin:6px 0;transition:.15s.ease;background:#fff}
     .option:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.06)}
     .option .arrow{margin-inline-start:auto;opacity:.8}
     .option.web:hover{border-color:#4332BD;background:rgba(67,50,189,.05)}
@@ -52,8 +54,8 @@
     </div>
 
     <!-- طرح‌ها + زیرطرح -->
-    <div class="row">
-      <div>
+    <div class="row" id="planRow">
+      <div id="catWrap">
         <label class="mini" for="category">طرح‌ها</label>
         <select id="category" aria-label="طرح‌ها" onchange="onCategoryChange()">
           <option value="special" selected>🏆 طرح ویژه</option>
@@ -62,8 +64,8 @@
           <option value="goldfund">🪙 طرح صندوق طلا (بزودی)</option>
         </select>
       </div>
-      <div>
-        <label class="mini" for="subplan">زیرطرح</label>
+      <div id="subWrap">
+        <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
         <select id="subplan" aria-label="زیرطرح" onchange="onSubplanChange()" style="display:none"></select>
       </div>
     </div>
@@ -73,14 +75,6 @@
       <label class="mini">مدت (روز)</label>
       <input id="openDays" type="number" min="1" step="1" value="30" />
       <div class="mini">دریافت سود: روزانه | برداشت سود: ماهانه</div>
-    </div>
-
-    <!-- سوییچ نمایش EAR برای ویژه -->
-    <div id="earToggleWrap" class="mini" style="display:none; text-align:right; margin-top:6px;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input id="toggleEAR" type="checkbox" checked />
-        نمایش نرخ مؤثر سالانه (EAR)
-      </label>
     </div>
 
     <input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" />
@@ -164,7 +158,6 @@
   // ====== فرمت اعداد و ورودی ======
   const nfFA = new Intl.NumberFormat('fa-IR');
   const formatNumber = (n) => nfFA.format(n);
-  const formatPercent = (x) => nfFA.format(Math.round(x*10000)/100) + '٪'; // دو رقم اعشار
 
   function normalizeDigits(str){
     const fa='۰۱۲۳۴۵۶۷۸۹', ar='٠١٢٣٤٥٦٧٨٩';
@@ -218,6 +211,11 @@
     Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null && v!=='') url.searchParams.set(k,v); });
     a.href = url.toString();
   }
+  function setRowCols(hasSub){
+    const row = document.getElementById('planRow');
+    row.classList.toggle('onecol', !hasSub);
+    document.getElementById('subWrap').style.display = hasSub ? '' : 'none';
+  }
 
   // ====== منطق انتخاب ======
   function onCategoryChange(){
@@ -227,34 +225,37 @@
     const openBox = document.getElementById('openControls');
     const calcBtn = document.getElementById('calcBtn');
     const resultEl = document.getElementById('result');
-    const earWrap = document.getElementById('earToggleWrap');
 
     // reset
     subSel.innerHTML = '';
     subSel.style.display = 'none';
     openBox.style.display = 'none';
-    earWrap.style.display = 'none';
     setError('');
     resultEl.textContent = '';
     toggleCTA(true);
     calcBtn.disabled = false;
 
     if(cat.type === 'group'){
+      // زیرطرح‌ها
       Object.entries(cat.children).forEach(([k,pl])=>{
         const opt=document.createElement('option');
-        opt.value = k; opt.textContent = pl.label; // 🏅 حفظ شد
+        opt.value = k; opt.textContent = pl.label; // 🏅 حفظ شده
         subSel.appendChild(opt);
       });
       subSel.style.display = '';
-      earWrap.style.display = ''; // نمایش سوییچ EAR برای ویژه
+      setRowCols(true); // دو ستونه
       const firstChild = Object.values(cat.children)[0];
       updateAmountPlaceholder(firstChild.min);
       updateCtaLink({category: catKey, sub: subSel.value});
     } else if(cat.type === 'dailyAPR_open'){
+      // بدون زیرطرح: تک‌ستونه
+      setRowCols(false);
       openBox.style.display = '';
       updateAmountPlaceholder(cat.min);
       updateCtaLink({category: catKey});
     } else if(cat.type === 'comingSoon'){
+      // بدون زیرطرح: تک‌ستونه + غیرفعال
+      setRowCols(false);
       calcBtn.disabled = true;
       toggleCTA(false);
       updateAmountPlaceholder(0);
@@ -277,7 +278,6 @@
     const catKey = document.getElementById('category').value;
     const cat = catalog[catKey];
     const amount = numberFromInput(document.getElementById('amount').value);
-    const showEAR = document.getElementById('toggleEAR').checked;
 
     const resultEl = document.getElementById('result');
     if(Number.isNaN(amount)){ setError('مبلغ را وارد کنید.'); return; }
@@ -290,18 +290,11 @@
       if(amount < plan.min){ setError(`حداقل مبلغ برای «${plan.label}» ${formatNumber(plan.min)} تومان است.`); return; }
       setError('');
       const out = calcTermYield(amount, plan.termYield, plan.termMonths);
-      let lines = [
-        `مدت: ${plan.termMonths} ماهه`,
-        `سود ماهانه: ${formatNumber(out.monthly)} تومان`,
-        `سود کل: ${formatNumber(out.profit)} تومان`
-      ];
-      if(showEAR){
-        const ear = Math.pow(1 + plan.termYield, 12/plan.termMonths) - 1;
-        lines.push(`نرخ مؤثر سالانه (EAR): ${formatPercent(ear)}`);
-      }
-      lines.push(`مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`);
-      text = lines.join('\n');
-
+      text =
+`مدت: ${plan.termMonths} ماهه
+سود ماهانه: ${formatNumber(out.monthly)} تومان
+سود کل: ${formatNumber(out.profit)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
       updateCtaLink({category: catKey, sub: subKey, amount, months: plan.termMonths});
     }
     else if(cat.type === 'dailyAPR_open'){
@@ -338,7 +331,6 @@
       flashBtn(btn, 'خطا در کپی ❗️');
     }
   }
-
   async function shareResult(){
     const btn = document.getElementById('btnShare');
     const text = document.getElementById('result').textContent.trim();
@@ -347,9 +339,8 @@
     const payload = { title: 'نتیجه محاسبه ریپی', text, url };
     if(navigator.share){
       try{ await navigator.share(payload); flashBtn(btn, 'اشتراک‌گذاری شد ✅'); }
-      catch(_){ /* کاربر انصراف داد */ }
+      catch(_){ /* انصراف کاربر */ }
     }else{
-      //fallback: کپی
       try{
         await navigator.clipboard.writeText(text + '\n' + url);
         flashBtn(btn, 'در دستگاه شما پشتیبانی نمی‌شود؛ متن کپی شد ✅');
@@ -358,8 +349,6 @@
       }
     }
   }
-
-  // افکت‌های کوچک دکمه
   function flashBtn(btn, msg){
     const old = btn.textContent;
     btn.textContent = msg;
@@ -413,13 +402,9 @@
 
   // ====== init ======
   document.getElementById('amount').addEventListener('input', formatInputAmount);
-  document.getElementById('toggleEAR').addEventListener('change', ()=>{ 
-    // اگر نتیجه‌ای وجود دارد، با تغییر سوییچ دوباره محاسبه شود
-    if(document.getElementById('result').textContent.trim()) calculate();
-  });
   document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('category').value = 'special';
-    onCategoryChange(); // زیرطرح‌ها را بسازد
+    onCategoryChange();
     const subSel = document.getElementById('subplan');
     if(subSel.options.length>0){ subSel.value = subSel.options[0].value; onSubplanChange(); }
     getCurrentCount();
