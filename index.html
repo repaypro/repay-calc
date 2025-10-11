@@ -64,8 +64,8 @@
       <div id="catWrap">
         <label class="mini" for="category">طرح‌ها</label>
         <select id="category" aria-label="طرح‌ها" onchange="onCategoryChange()">
-          <option value="diamond">💎 طرح الماس</option>
-          <option value="special" selected>🏆 طرح ویژه</option>
+          <option value="diamond"  selected>💎 طرح الماس</option>
+          <option value="special" >🏆 طرح ویژه</option>
           <option value="hamrahi">♥️ طرح همراهی (بزودی)</option>
         </select>
       </div>
@@ -145,10 +145,10 @@
         type: 'group',
         label: '🏆 طرح ویژه',
         children: {
-          gold120: { label: "🏅 ویژه ۱۲۰٪ (24ماهه)", type: "termYield", termMonths: 24, termYield: 1.20, min: 9000000 },
-          gold57:  { label: "🏅 ویژه ۵۷٪ (12ماهه)",  type: "termYield", termMonths: 12, termYield: 0.57, min: 9000000 },
-          gold25:  { label: "🏅 ویژه ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5000000 },
-          gold9:   { label: "🏅 ویژه ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5000000 },
+          gold120: { label: "🏅 ویژه ۱۲۰٪ (24ماهه)", type: "termYield", termMonths: 24, termYield: 1.20, min: 5_000_000 },
+          gold57:  { label: "🏅 ویژه ۵۷٪ (12ماهه)",  type: "termYield", termMonths: 12, termYield: 0.57, min: 5_000_000 },
+          gold25:  { label: "🏅 ویژه ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5_000_000 },
+          gold9:   { label: "🏅 ویژه ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5_000_000 },
         }
       },
       hamrahi: { type: 'comingSoon', label: '♥️ طرح همراهی (بزودی)' }
