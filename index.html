@@ -200,4 +200,52 @@ function calculate(){
   const cat=catalog[catKey];
   const amount=numberFromInput(document.getElementById('amount').value);
   const resultEl=document.getElementById('result');
-  if(Number.isNaN(amount)){setError('مبلغ را وارد کنید.
+  if(Number.isNaN(amount)){setError('مبلغ را وارد کنید.');return;}
+
+  let text='';
+  if(cat.type==='group'){
+    const subKey=document.getElementById('subplan').value;
+    const plan=catalog[catKey].children[subKey];
+    if(amount<plan.min){setError(`حداقل مبلغ برای «${plan.label}» ${formatNumber(plan.min)} تومان است.`);return;}
+    setError('');
+    const out=calcTermYield(amount,plan.termYield,plan.termMonths);
+    text=`مدت: ${plan.termMonths} ماهه
+سود ماهانه: ${formatNumber(out.monthly)} تومان
+سود کل: ${formatNumber(out.profit)} تومان
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
+    updateCtaLink({category:catKey,sub:subKey,amount,months:plan.termMonths});
+  } else if(cat.type==='comingSoon'){resultEl.textContent='این طرح در حال حاضر فعال نیست.';return;}
+
+  resultEl.textContent=text;
+  resultEl.classList.remove('hidden');resultEl.classList.add('visible');
+  saveSelection(catKey,document.getElementById('subplan').value,amount);
+}
+
+// ====== Copy & Share ======
+async function copyResult(){const btn=document.getElementById('btnCopy');const text=document.getElementById('result').textContent.trim();if(!text){btnShake(btn);return;}try{await navigator.clipboard.writeText(text);flashBtn(btn,'کپی شد ✅');}catch(_){flashBtn(btn,'خطا در کپی ❗️');}}
+async function shareResult(){const btn=document.getElementById('btnShare');const text=document.getElementById('result').textContent.trim();if(!text){btnShake(btn);return;}const url=document.getElementById('ctaStart').href;const payload={title:'نتیجه محاسبه ریپی',text,url};if(navigator.share){try{await navigator.share(payload);flashBtn(btn,'اشتراک‌گذاری شد ✅');}catch(_){}}else{try{await navigator.clipboard.writeText(text+'\n'+url);flashBtn(btn,'در دستگاه شما پشتیبانی نمی‌شود؛ متن کپی شد ✅');}catch(_){flashBtn(btn,'خطا در اشتراک‌گذاری ❗️');}}
+function flashBtn(btn,msg){const old=btn.textContent;btn.textContent=msg;btn.disabled=true;setTimeout(()=>{btn.textContent=old;btn.disabled=false;},1500);}
+function btnShake(btn){const old=btn.style.transform;btn.style.transform='translateX(-3px)';setTimeout(()=>{btn.style.transform='translateX(3px)';},80);setTimeout(()=>{btn.style.transform=old||'none';},160);}
+
+// ====== Modal ======
+(function setupModal(){
+  const modal=document.getElementById('downloadModal');
+  const openBtn=document.getElementById('btnOpenModal');
+  const closeBtn=document.getElementById('btnCloseModal');
+  function open(){modal.style.display='flex';}
+  function close(){modal.style.display='none';}
+  openBtn.addEventListener('click',open);
+  closeBtn.addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+})();
+
+// ====== Init ======
+document.getElementById('amount').addEventListener('input',formatInputAmount);
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('category').value='platinum';
+  onCategoryChange();
+});
+</script>
+</body>
+</html>
