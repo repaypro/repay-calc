@@ -1,251 +1,417 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ماشین‌حساب سود سرمایه‌گذاری ریپی</title>
-<style>
-body{font-family:IranSans,sans-serif;direction:rtl;background:#f5f5f5;margin:0;padding:0;text-align:center;color:#2d0c59}
-.container{max-width:460px;background:#fff;margin:30px auto;padding:24px;border-radius:25px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
-img.logo{width:90px;margin-bottom:10px}
-h1{font-size:22px;margin:10px 0}
-p{font-size:14px;margin-bottom:16px;line-height:1.9}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.row.onecol{grid-template-columns:1fr;}
-select,input[type="text"],input[type="number"]{width:100%;padding:12px;margin-bottom:12px;font-size:15px;border-radius:12px;border:1px solid #ccc;text-align:right;box-sizing:border-box}
-input[type="text"]{direction:ltr}
-input[type="range"]{width:100%}
-button{background:#121212;color:#fff;border:none;padding:14px;font-size:16px;border-radius:12px;cursor:pointer;width:100%;margin:8px 0 16px}
-button:active{transform:translateY(1px)}
-.btn-secondary{background:#4332BD}
-.btn-ghost{background:#fff;color:#121212;border:1px solid #ddd}
-.mini{font-size:12px;color:#666}
-.result{background:#fafafa;padding:18px;border-radius:14px;text-align:right;line-height:1.9;white-space:pre-line;transition:all 0.3s ease;}
-.result.visible{transform:translateY(0);opacity:1;}
-.result.hidden{transform:translateY(-10px);opacity:0;}
-.error{color:#d33;font-size:12px;text-align:right;min-height:18px;margin:-6px 0 10px}
-.usage-counter{margin-top:10px;font-size:14px;color:#555}
-.hidden{display:none}
-.actions{display:flex;gap:8px;margin-top:10px}
-.actions button{flex:1;padding:10px;margin:0}
-/* ---- Download Modal ---- */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px;z-index:999}
-.modal{width:100%;max-width:420px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.15)}
-.modal-header{background-image:linear-gradient(135deg,#4332BD,#6f58ff,#E96742);color:#fff;text-align:right;padding:14px 16px}
-.modal-header .close{background:transparent;border:0;color:#fff;font-size:18px;width:auto;float:left;margin-top:-4px;cursor:pointer}
-.modal-body{padding:10px;text-align:right}
-.option{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;border:1px solid #eee;text-decoration:none;color:#111;margin:6px 0;transition:.15s ease;background:#fff}
-.option:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.06)}
-.option .arrow{margin-inline-start:auto;opacity:.8}
-.option.web:hover{border-color:#4332BD;background:rgba(67,50,189,.05)}
-.option.bazaar:hover{border-color:#E96742;background:rgba(233,103,66,.06)}
-.option.myket:hover{border-color:#0B0B0F;background:rgba(0,0,0,.05)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ماشین‌حساب سود سرمایه‌گذاری ریپی</title>
+  <style>
+    body{font-family:IranSans, sans-serif;direction:rtl;background:#f5f5f5;margin:0;padding:0;text-align:center;color:#2d0c59}
+    .container{max-width:460px;background:#fff;margin:30px auto;padding:24px;border-radius:25px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+    img.logo{width:90px;margin-bottom:10px}
+    h1{font-size:22px;margin:10px 0}
+    p{font-size:14px;margin-bottom:16px;line-height:1.9}
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+    .row.onecol{grid-template-columns:1fr}
+
+    select,input[type="text"],input[type="number"]{
+      width:100%;padding:12px;margin-bottom:12px;font-size:15px;border-radius:12px;border:1px solid #ccc;text-align:right;box-sizing:border-box
+    }
+    input[type="text"]{direction:ltr}
+    button{background:#121212;color:#fff;border:none;padding:14px;font-size:16px;border-radius:12px;cursor:pointer;width:100%;margin:8px 0 16px}
+    button:active{transform:translateY(1px)}
+    .btn-secondary{background:#4332BD}
+    .btn-ghost{background:#fff;color:#121212;border:1px solid #ddd}
+    .mini{font-size:12px;color:#666}
+    .result{background:#fafafa;padding:18px;border-radius:14px;text-align:right;line-height:1.9;white-space:pre-line}
+    .error{color:#d33;font-size:12px;text-align:right;min-height:18px;margin:-6px 0 10px}
+    .usage-counter{margin-top:10px;font-size:14px;color:#555}
+    .hidden{display:none}
+    .actions{display:flex;gap:8px;margin-top:10px}
+    .actions button{flex:1;padding:10px;margin:0}
+
+    /* CTA as link-button */
+    a.btn-primary{display:block;text-decoration:none;text-align:center;background:#121212;color:#fff;border-radius:12px;padding:14px;margin:8px 0 16px}
+    a.btn-primary:active{transform:translateY(1px)}
+
+    /* ---- Download Modal ---- */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px;z-index:999}
+    .modal{width:100%;max-width:420px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.15)}
+    .modal-header{background-image:linear-gradient(135deg,#4332BD,#6f58ff,#E96742);color:#fff;text-align:right;padding:14px 16px}
+    .modal-header .close{background:transparent;border:0;color:#fff;font-size:18px;width:auto;float:left;margin-top:-4px;cursor:pointer}
+    .modal-body{padding:10px;text-align:right}
+    .option{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;border:1px solid #eee;text-decoration:none;color:#111;margin:6px 0;transition:.15s ease;background:#fff}
+    .option:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.06)}
+    .option .arrow{margin-inline-start:auto;opacity:.8}
+    .option.web:hover{border-color:#4332BD;background:rgba(67,50,189,.05)}
+    .option.bazaar:hover{border-color:#E96742;background:rgba(233,103,66,.06)}
+    .option.myket:hover{border-color:#0B0B0F;background:rgba(0,0,0,.05)}
+  </style>
 </head>
 <body>
-<div class="container">
-<img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
-<h1>ماشین حساب سود سرمایه‌گذاری</h1>
-<p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود.</p>
+  <div class="container">
+    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
+    <h1>ماشین حساب سود سرمایه‌گذاری</h1>
+    <p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود.</p>
 
-<div style="margin-bottom:12px">
-<button id="btnOpenModal" type="button" class="btn-secondary">دانلود اپلیکیشن</button>
-</div>
+    <!-- Download App Button -->
+    <div style="margin-bottom:12px">
+      <button id="btnOpenModal" type="button" class="btn-secondary">دانلود اپلیکیشن</button>
+    </div>
 
-<div class="row" id="planRow">
-  <div id="catWrap">
-    <label class="mini" for="category">طرح‌ها</label>
-    <select id="category" aria-label="طرح‌ها" onchange="onCategoryChange()">
-      <option value="platinum" selected>💎 طرح پلاتینیوم</option>
-      <option value="special">🏆 طرح ویژه</option>
-      <option value="daily23">💵 طرح روزشمار (بزودی)</option>
-      <option value="hamrahi">♥️ طرح همراهی (بزودی)</option>
-    </select>
-  </div>
-  <div id="subWrap">
-    <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
-    <select id="subplan" aria-label="زیرطرح" onchange="onSubplanChange()" style="display:none"></select>
-  </div>
-</div>
-
-<div id="openControls" style="display:none; text-align:right; margin-top:-6px;">
-  <label class="mini">مدت (روز)</label>
-  <input id="openDays" type="number" min="1" step="1" value="30" />
-  <div class="mini">دریافت سود: روزانه | برداشت سود: ماهانه</div>
-</div>
-
-<input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" />
-<div id="amountError" class="error"></div>
-
-<button id="calcBtn" type="button" onclick="calculate()">محاسبه</button>
-
-<div class="result hidden" id="result" aria-live="polite"></div>
-
-<div class="actions">
-  <button id="btnCopy" class="btn-ghost" type="button" onclick="copyResult()">📋 کپی نتیجه</button>
-  <button id="btnShare" class="btn-ghost" type="button" onclick="shareResult()">📤 اشتراک‌گذاری</button>
-</div>
-
-<a id="ctaStart" href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">
-  <button type="button">همین الان شروع کن</button>
-</a>
-
-<div class="usage-counter">📊 count : <span id="useCount">0</span></div>
-</div>
-
-<!-- Download Modal -->
-<div id="downloadModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dl-title">
-  <div class="modal">
-    <div class="modal-header">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div id="dl-title" style="font-weight:700;">دانلود و نصب اپلیکیشن ریپی</div>
-        <button id="btnCloseModal" class="close" aria-label="بستن">✕</button>
+    <!-- طرح‌ها + زیرطرح -->
+    <div class="row" id="planRow">
+      <div id="catWrap">
+        <label class="mini" for="category">طرح‌ها</label>
+        <select id="category" aria-label="طرح‌ها" onchange="onCategoryChange()">
+          <option value="special" selected>🏆 طرح ویژه</option>
+          <option value="diamond">💎 طرح الماس</option>
+          <option value="hamrahi">♥️ طرح همراهی (بزودی)</option>
+        </select>
       </div>
-      <div style="font-size:12px; opacity:.85; margin-top:4px;">یکی از گزینه‌های زیر را انتخاب کنید</div>
+      <div id="subWrap">
+        <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
+        <select id="subplan" aria-label="زیرطرح" onchange="onSubplanChange()" style="display:none"></select>
+      </div>
     </div>
-    <div class="modal-body">
-      <a class="option web" href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">
-        🌐 وب اپلیکیشن
-        <div class="arrow">↗</div>
-      </a>
-      <a class="option bazaar" href="http://cafebazaar.ir/app/?id=io.rebix.pay&ref=share" target="_blank" rel="noreferrer noopener">
-        🛒 کافه بازار
-        <div class="arrow">↗</div>
-      </a>
-      <a class="option myket" href="https://myket.ir/app/io.rebix.pay" target="_blank" rel="noreferrer noopener">
-        📱 مایکت
-        <div class="arrow">↗</div>
-      </a>
+
+    <!-- مبلغ -->
+    <input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" />
+    <div id="amountError" class="error"></div>
+
+    <button id="calcBtn" type="button" onclick="calculate()">محاسبه</button>
+
+    <div class="result" id="result" aria-live="polite"></div>
+
+    <div class="actions">
+      <button id="btnCopy" class="btn-ghost" type="button" onclick="copyResult()">📋 کپی نتیجه</button>
+      <button id="btnShare" class="btn-ghost" type="button" onclick="shareResult()">📤 اشتراک‌گذاری</button>
     </div>
-    <div style="background:#f6f6f6; color:#666; font-size:11px; text-align:right; padding:10px 12px;">
-      با انتخاب هر گزینه، به صفحهٔ نصب مربوط هدایت می‌شوید.
+
+    <a id="ctaStart" class="btn-primary" href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">همین الان شروع کن</a>
+
+    <div class="usage-counter">📊 count : <span id="useCount">0</span></div>
+  </div>
+
+  <!-- Download Modal -->
+  <div id="downloadModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="dl-title">
+    <div class="modal">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div id="dl-title" style="font-weight:700;">دانلود و نصب اپلیکیشن ریپی</div>
+          <button id="btnCloseModal" class="close" aria-label="بستن">✕</button>
+        </div>
+        <div style="font-size:12px; opacity:.85; margin-top:4px;">یکی از گزینه‌های زیر را انتخاب کنید</div>
+      </div>
+      <div class="modal-body">
+        <a class="option web" href="https://my.repay.pro" target="_blank" rel="noreferrer noopener">
+          <div style="font-size:22px">🌐</div>
+          <div>
+            <div style="font-weight:600;">وب اپلیکیشن</div>
+            <div style="font-size:12px; color:#666;">بدون نصب، مستقیم داخل مرورگر</div>
+          </div>
+          <div class="arrow">↗</div>
+        </a>
+        <a class="option bazaar" href="http://cafebazaar.ir/app/?id=io.rebix.pay&ref=share" target="_blank" rel="noreferrer noopener">
+          <div style="font-size:22px">🛒</div>
+          <div><div style="font-weight:600;">کافه بازار</div><div style="font-size:12px; color:#666;">نصب از مارکت بازار</div></div>
+          <div class="arrow">↗</div>
+        </a>
+        <a class="option myket" href="https://myket.ir/app/io.rebix.pay" target="_blank" rel="noreferrer noopener">
+          <div style="font-size:22px">📱</div>
+          <div><div style="font-weight:600;">مایکت</div><div style="font-size:12px; color:#666;">نصب از مارکت مایکت</div></div>
+          <div class="arrow">↗</div>
+        </a>
+      </div>
+      <div style="background:#f6f6f6; color:#666; font-size:11px; text-align:right; padding:10px 12px;">
+        با انتخاب هر گزینه، به صفحهٔ نصب مربوط هدایت می‌شوید.
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-const catalog = {
-  platinum:{
-    type:'group',
-    label:'💎 طرح پلاتینیوم',
-    children:{
-      pl60:{label:'💠 ۶۰٪ یکساله',type:'termYield',termMonths:12,termYield:0.60,min:5000000},
-      pl63:{label:'💠 ۶۳٪ یکساله',type:'termYield',termMonths:12,termYield:0.63,min:30000000},
-      pl66:{label:'💠 ۶۶٪ یکساله',type:'termYield',termMonths:12,termYield:0.66,min:100000000}
+  <script>
+    // ====== داده‌ها ======
+    const catalog = {
+      special: {
+        type: 'group',
+        label: '🏆 طرح ویژه',
+        children: {
+          gold120: { label: "🏅 ویژه ۱۲۰٪ (۲ساله)", type: "termYield", termMonths: 24, termYield: 1.20, min: 9000000 },
+          gold57:  { label: "🏅 ویژه ۵۷٪ (یکساله)",  type: "termYield", termMonths: 12, termYield: 0.57, min: 9000000 },
+          gold25:  { label: "🏅 ویژه ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5000000 },
+          gold9:   { label: "🏅 ویژه ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5000000 },
+        }
+      },
+      diamond: {
+        type: 'group',
+        label: '💎 طرح الماس',
+        children: {
+          dia60: { label: "💎 الماس ۶۰٪ (۱۲ماهه) — حداقل ۵,۰۰۰,۰۰۰",  type: "termYield", termMonths: 12, termYield: 0.60, min: 5_000_000 },
+          dia63: { label: "💎 الماس ۶۳٪ (۱۲ماهه) — حداقل ۳۰,۰۰۰,۰۰۰", type: "termYield", termMonths: 12, termYield: 0.63, min: 30_000_000 },
+          dia66: { label: "💎 الماس ۶۶٪ (۱۲ماهه) — حداقل ۱۰۰,۰۰۰,۰۰۰",type: "termYield", termMonths: 12, termYield: 0.66, min: 100_000_000 },
+        }
+      },
+      hamrahi: { type: 'comingSoon', label: '♥️ طرح همراهی (بزودی)' }
+    };
+
+    // ====== فرمت اعداد و ورودی ======
+    const nfFA = new Intl.NumberFormat('fa-IR');
+    const formatNumber = (n) => nfFA.format(n);
+
+    function normalizeDigits(str){
+      const fa='۰۱۲۳۴۵۶۷۸۹', ar='٠١٢٣٤٥٦٧٨٩';
+      return (str||'').replace(/[\u06F0-\u06F9\u0660-\u0669]/g,d=>{
+        const i=fa.indexOf(d); if(i>-1) return String(i);
+        const j=ar.indexOf(d); if(j>-1) return String(j);
+        return d;
+      });
     }
-  },
-  special:{
-    type:'group',
-    label:'🏆 طرح ویژه',
-    children:{
-      gold120:{label:'🏅 ویژه ۱۲۰٪ (۲ساله)',type:'termYield',termMonths:24,termYield:1.20,min:9000000},
-      gold57:{label:'🏅 ویژه ۵۷٪ (یکساله)',type:'termYield',termMonths:12,termYield:0.57,min:9000000},
-      gold25:{label:'🏅 ویژه ۲۵٪ (۶ماهه)',type:'termYield',termMonths:6,termYield:0.25,min:5000000},
-      gold9:{label:'🏅 ویژه ۹٪ (۳ماهه)',type:'termYield',termMonths:3,termYield:0.09,min:5000000}
+    function numberFromInput(val){
+      const normalized = normalizeDigits(val);
+      const raw = normalized.replace(/[^\d]/g,'');
+      return raw ? Math.min(parseInt(raw,10), Number.MAX_SAFE_INTEGER) : NaN;
     }
-  },
-  daily23:{type:'comingSoon',label:'💵 طرح روزشمار (بزودی)'},
-  hamrahi:{type:'comingSoon',label:'♥️ طرح همراهی (بزودی)'}
-};
+    function formatInputAmount(e){
+      const input=e.target;
+      const n=numberFromInput(input.value);
+      if(Number.isNaN(n)){ input.value=''; return; }
+      input.value = formatNumber(n);
+    }
+    function setError(msg){
+      document.getElementById('amountError').textContent = msg || '';
+    }
 
-const nfFA = new Intl.NumberFormat('fa-IR');
-const formatNumber = n=>nfFA.format(n);
-function normalizeDigits(str){const fa='۰۱۲۳۴۵۶۷۸۹',ar='٠١٢٣٤٥٦٧٨٩';return (str||'').replace(/[\u06F0-\u06F9\u0660-\u0669]/g,d=>{const i=fa.indexOf(d);if(i>-1)return String(i);const j=ar.indexOf(d);if(j>-1)return String(j);return d;});}
-function numberFromInput(val){const raw=normalizeDigits(val).replace(/[^\d]/g,'');return raw?Math.min(parseInt(raw,10),Number.MAX_SAFE_INTEGER):NaN;}
-function formatInputAmount(e){const input=e.target;const n=numberFromInput(input.value);if(Number.isNaN(n)){input.value='';return;}input.value=formatNumber(n);}
-function setError(msg){document.getElementById('amountError').textContent=msg||'';}
-const calcTermYield=(P,termYield,termMonths)=>{const profit=Math.round(P*termYield);const monthly=Math.round(profit/termMonths);return {profit,monthly,finalAmount:P+profit};};
-function setRowCols(hasSub){const row=document.getElementById('planRow');row.classList.toggle('onecol',!hasSub);document.getElementById('subWrap').style.display=hasSub?'':'none';}
-function toggleCTA(show){document.getElementById('ctaStart').style.display=show?'':'none';}
-function updateCtaLink(params={}){const a=document.getElementById('ctaStart');const url=new URL('https://my.repay.pro');Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,v);});a.href=url.toString();}
-function saveSelection(catKey,subKey,amount){localStorage.setItem('lastSelection',JSON.stringify({category:catKey,subplan:subKey,amount}));}
-function loadSelection(){return JSON.parse(localStorage.getItem('lastSelection')||'{}');}
+    // ====== محاسبات ======
+    function calcTermYield(P, termYield, termMonths){
+      const profit = Math.round(P * termYield);
+      const monthly = Math.round(profit / termMonths);
+      return { profit, monthly, finalAmount: P + profit };
+    }
 
-function onCategoryChange(){
-  const catKey=document.getElementById('category').value;
-  const cat=catalog[catKey];
-  const subSel=document.getElementById('subplan');
-  const openBox=document.getElementById('openControls');
-  const calcBtn=document.getElementById('calcBtn');
-  const resultEl=document.getElementById('result');
-  subSel.innerHTML='';subSel.style.display='none';openBox.style.display='none';setError('');resultEl.textContent='';toggleCTA(true);calcBtn.disabled=false;
+    // ====== UI Helpers ======
+    function updateAmountPlaceholder(min){
+      const txt = min>0
+        ? `حداقل مبلغ ${formatNumber(min)} تومان`
+        : 'مبلغ سرمایه (تومان)';
+      document.getElementById('amount').placeholder = txt;
+    }
+    function toggleCTA(show){
+      const a = document.getElementById('ctaStart');
+      a.style.display = show ? '' : 'none';
+    }
+    function updateCtaLink(params = {}){
+      const a = document.getElementById('ctaStart');
+      const url = new URL('https://my.repay.pro');
+      Object.entries(params).forEach(([k,v])=>{
+        if(v!==undefined && v!==null && v!=='') url.searchParams.set(k,v);
+      });
+      a.href = url.toString();
+    }
+    function setRowCols(hasSub){
+      const row = document.getElementById('planRow');
+      row.classList.toggle('onecol', !hasSub);
+      document.getElementById('subWrap').style.display = hasSub ? '' : 'none';
+    }
 
-  if(cat.type==='group'){
-    Object.entries(cat.children).forEach(([k,pl])=>{
-      const opt=document.createElement('option');opt.value=k;opt.textContent=pl.label;subSel.appendChild(opt);
-    });
-    subSel.style.display='';setRowCols(true);
-    const firstChild=Object.values(cat.children)[0];updateAmountPlaceholder(firstChild.min);
-    updateCtaLink({category:catKey,sub:subSel.value});
-  } else if(cat.type==='dailyAPR_open'){setRowCols(false);openBox.style.display='';updateAmountPlaceholder(cat.min);updateCtaLink({category:catKey});} else if(cat.type==='comingSoon'){setRowCols(false);calcBtn.disabled=true;toggleCTA(false);updateAmountPlaceholder(0);resultEl.textContent='این طرح در حال حاضر فعال نیست.';}
+    // ====== منطق انتخاب ======
+    function onCategoryChange(){
+      const catKey = document.getElementById('category').value;
+      const cat = catalog[catKey];
+      const subSel = document.getElementById('subplan');
+      const calcBtn = document.getElementById('calcBtn');
+      const resultEl = document.getElementById('result');
 
-  const last=loadSelection();
-  if(last&&last.category===catKey){subSel.value=last.subplan||subSel.value;if(last.amount)document.getElementById('amount').value=formatNumber(last.amount);}
-}
+      // reset
+      subSel.innerHTML = '';
+      subSel.style.display = 'none';
+      setError('');
+      resultEl.textContent = '';
+      toggleCTA(true);
+      calcBtn.disabled = false;
 
-function onSubplanChange(){
-  const catKey=document.getElementById('category').value;
-  const subKey=document.getElementById('subplan').value;
-  const pl=catalog[catKey].children[subKey];
-  updateAmountPlaceholder(pl.min);
-  document.getElementById('result').textContent='';setError('');
-  updateCtaLink({category:catKey,sub:subKey});
-  saveSelection(catKey,subKey,numberFromInput(document.getElementById('amount').value));
-}
+      if(cat.type === 'group'){
+        Object.entries(cat.children).forEach(([k,pl])=>{
+          const opt=document.createElement('option');
+          opt.value = k;
+          opt.textContent = pl.label;
+          subSel.appendChild(opt);
+        });
+        subSel.style.display = '';
+        setRowCols(true);
+        const firstChildKey = Object.keys(cat.children)[0];
+        subSel.value = firstChildKey;
+        const firstChild = cat.children[firstChildKey];
+        updateAmountPlaceholder(firstChild.min);
+        updateCtaLink({category: catKey, sub: firstChildKey});
+      }
+      else if(cat.type === 'comingSoon'){
+        setRowCols(false);
+        calcBtn.disabled = true;
+        toggleCTA(false);
+        updateAmountPlaceholder(0);
+        resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
+      }
+    }
 
-function updateAmountPlaceholder(min){document.getElementById('amount').placeholder=min>0?`حداقل مبلغ ${formatNumber(min)} تومان`:'مبلغ سرمایه (تومان)';}
+    function onSubplanChange(){
+      const catKey = document.getElementById('category').value;
+      const subKey = document.getElementById('subplan').value;
+      const cat = catalog[catKey];
+      if(!subKey || !cat?.children?.[subKey]) return;
+      const pl = cat.children[subKey];
+      updateAmountPlaceholder(pl.min);
+      document.getElementById('result').textContent = '';
+      setError('');
+      updateCtaLink({category: catKey, sub: subKey});
+    }
 
-function calculate(){
-  const catKey=document.getElementById('category').value;
-  const cat=catalog[catKey];
-  const amount=numberFromInput(document.getElementById('amount').value);
-  const resultEl=document.getElementById('result');
-  if(Number.isNaN(amount)){setError('مبلغ را وارد کنید.');return;}
+    // ====== محاسبه ======
+    function calculate(){
+      const catKey = document.getElementById('category').value;
+      const cat = catalog[catKey];
+      const amount = numberFromInput(document.getElementById('amount').value);
+      const resultEl = document.getElementById('result');
 
-  let text='';
-  if(cat.type==='group'){
-    const subKey=document.getElementById('subplan').value;
-    const plan=catalog[catKey].children[subKey];
-    if(amount<plan.min){setError(`حداقل مبلغ برای «${plan.label}» ${formatNumber(plan.min)} تومان است.`);return;}
-    setError('');
-    const out=calcTermYield(amount,plan.termYield,plan.termMonths);
-    text=`مدت: ${plan.termMonths} ماهه
+      if(Number.isNaN(amount)){
+        setError('مبلغ را وارد کنید.');
+        return;
+      }
+
+      if(cat.type === 'group'){
+        const subKey = document.getElementById('subplan').value;
+        const plan = catalog[catKey].children[subKey];
+
+        if(amount < plan.min){
+          setError(`حداقل مبلغ برای «${plan.label}» ${formatNumber(plan.min)} تومان است.`);
+          return;
+        }
+        setError('');
+
+        const out = calcTermYield(amount, plan.termYield, plan.termMonths);
+        const text =
+`مدت: ${plan.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل: ${formatNumber(out.profit)} تومان
 مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
-    updateCtaLink({category:catKey,sub:subKey,amount,months:plan.termMonths});
-  } else if(cat.type==='comingSoon'){resultEl.textContent='این طرح در حال حاضر فعال نیست.';return;}
 
-  resultEl.textContent=text;
-  resultEl.classList.remove('hidden');resultEl.classList.add('visible');
-  saveSelection(catKey,document.getElementById('subplan').value,amount);
-}
+        resultEl.textContent = text;
+        updateCtaLink({category: catKey, sub: subKey, amount, months: plan.termMonths});
+        updateCounter();
+      }
+      else if(cat.type === 'comingSoon'){
+        resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
+        return;
+      }
+    }
 
-// ====== Copy & Share ======
-async function copyResult(){const btn=document.getElementById('btnCopy');const text=document.getElementById('result').textContent.trim();if(!text){btnShake(btn);return;}try{await navigator.clipboard.writeText(text);flashBtn(btn,'کپی شد ✅');}catch(_){flashBtn(btn,'خطا در کپی ❗️');}}
-async function shareResult(){const btn=document.getElementById('btnShare');const text=document.getElementById('result').textContent.trim();if(!text){btnShake(btn);return;}const url=document.getElementById('ctaStart').href;const payload={title:'نتیجه محاسبه ریپی',text,url};if(navigator.share){try{await navigator.share(payload);flashBtn(btn,'اشتراک‌گذاری شد ✅');}catch(_){}}else{try{await navigator.clipboard.writeText(text+'\n'+url);flashBtn(btn,'در دستگاه شما پشتیبانی نمی‌شود؛ متن کپی شد ✅');}catch(_){flashBtn(btn,'خطا در اشتراک‌گذاری ❗️');}}
-function flashBtn(btn,msg){const old=btn.textContent;btn.textContent=msg;btn.disabled=true;setTimeout(()=>{btn.textContent=old;btn.disabled=false;},1500);}
-function btnShake(btn){const old=btn.style.transform;btn.style.transform='translateX(-3px)';setTimeout(()=>{btn.style.transform='translateX(3px)';},80);setTimeout(()=>{btn.style.transform=old||'none';},160);}
+    // ====== کپی و اشتراک‌گذاری ======
+    async function copyResult(){
+      const btn = document.getElementById('btnCopy');
+      const text = document.getElementById('result').textContent.trim();
+      if(!text){ btnShake(btn); return; }
+      try{
+        await navigator.clipboard.writeText(text);
+        flashBtn(btn, 'کپی شد ✅');
+      }catch(_){
+        flashBtn(btn, 'خطا در کپی ❗️');
+      }
+    }
+    async function shareResult(){
+      const btn = document.getElementById('btnShare');
+      const text = document.getElementById('result').textContent.trim();
+      if(!text){ btnShake(btn); return; }
+      const url = document.getElementById('ctaStart').href;
+      const payload = { title: 'نتیجه محاسبه ریپی', text, url };
+      if(navigator.share){
+        try{
+          await navigator.share(payload);
+          flashBtn(btn, 'اشتراک‌گذاری شد ✅');
+        } catch(_){ /* انصراف کاربر */ }
+      }else{
+        try{
+          await navigator.clipboard.writeText(text + '\n' + url);
+          flashBtn(btn, 'در دستگاه شما پشتیبانی نمی‌شود؛ متن کپی شد ✅');
+        }catch(_){
+          flashBtn(btn, 'خطا در اشتراک‌گذاری ❗️');
+        }
+      }
+    }
+    function flashBtn(btn, msg){
+      const old = btn.textContent;
+      btn.textContent = msg;
+      btn.disabled = true;
+      setTimeout(()=>{ btn.textContent = old; btn.disabled = false; }, 1500);
+    }
+    function btnShake(btn){
+      const old = btn.style.transform;
+      btn.style.transform = 'translateX(-3px)';
+      setTimeout(()=>{ btn.style.transform = 'translateX(3px)'; }, 80);
+      setTimeout(()=>{ btn.style.transform = old || 'none'; }, 160);
+    }
 
-// ====== Modal ======
-(function setupModal(){
-  const modal=document.getElementById('downloadModal');
-  const openBtn=document.getElementById('btnOpenModal');
-  const closeBtn=document.getElementById('btnCloseModal');
-  function open(){modal.style.display='flex';}
-  function close(){modal.style.display='none';}
-  openBtn.addEventListener('click',open);
-  closeBtn.addEventListener('click',close);
-  modal.addEventListener('click',e=>{if(e.target===modal)close();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
-})();
+    // ====== شمارنده (GAS JSONP) ======
+    const COUNTER_NS = 'repay_calc';
+    const COUNTER_KEY = 'usage_count';
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbxkeNkd__in37pKasVS0lhD7ffK7iB2dxS1A7hSgY8R9TngJLjfRwcIp4kuowDs7O-4/exec';
+    const URL_GET = `${API_BASE}?op=get&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
+    const URL_HIT = `${API_BASE}?op=hit&ns=${COUNTER_NS}&key=${COUNTER_KEY}`;
 
-// ====== Init ======
-document.getElementById('amount').addEventListener('input',formatInputAmount);
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('category').value='platinum';
-  onCategoryChange();
-});
-</script>
+    function jsonp(url){
+      return new Promise((resolve,reject)=>{
+        const cb='cb_'+Math.random().toString(36).slice(2);
+        window[cb]=data=>{ resolve(data); cleanup(); };
+        const s=document.createElement('script');
+        s.src = url + (url.includes('?')?'&':'?') + 'callback=' + cb;
+        s.onerror=()=>{ reject(); cleanup(); };
+        document.body.appendChild(s);
+        function cleanup(){ try{ delete window[cb]; }catch(_){} s.remove(); }
+      });
+    }
+    function setCount(v){ document.getElementById('useCount').innerText = (v ?? 0); }
+    function getCurrentCount(){ jsonp(URL_GET).then(d=>setCount(d.value)).catch(()=>setCount(0)); }
+    function updateCounter(){
+      const el=document.getElementById('useCount');
+      el.innerText=(parseInt(el.innerText||'0',10)+1);
+      jsonp(URL_HIT).then(d=>setCount(d.value)).catch(()=>{});
+    }
+
+    // ====== مدال دانلود ======
+    (function setupModal(){
+      const modal=document.getElementById('downloadModal');
+      const openBtn=document.getElementById('btnOpenModal');
+      const closeBtn=document.getElementById('btnCloseModal');
+      let lastFocus = null;
+
+      function open(){
+        lastFocus = document.activeElement;
+        modal.style.display='flex';
+        closeBtn.focus();
+      }
+      function close(){
+        modal.style.display='none';
+        if(lastFocus) lastFocus.focus();
+      }
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', e=>{ if(e.target===modal) close(); });
+      document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+    })();
+
+    // ====== init ======
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const amountEl = document.getElementById('amount');
+      amountEl.addEventListener('input', formatInputAmount);
+
+      document.getElementById('category').value = 'special';
+      onCategoryChange();
+
+      const subSel = document.getElementById('subplan');
+      if(subSel.options.length>0){
+        subSel.value = subSel.options[0].value;
+        onSubplanChange();
+      }
+      getCurrentCount();
+    });
+  </script>
 </body>
 </html>
