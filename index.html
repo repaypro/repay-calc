@@ -64,8 +64,8 @@
       <div id="catWrap">
         <label class="mini" for="category">طرح‌ها</label>
         <select id="category" aria-label="طرح‌ها" onchange="onCategoryChange()">
-          <option value="special" selected>🏆 طرح ویژه</option>
           <option value="diamond">💎 طرح الماس</option>
+          <option value="special" selected>🏆 طرح ویژه</option>
           <option value="hamrahi">♥️ طرح همراهی (بزودی)</option>
         </select>
       </div>
@@ -132,23 +132,23 @@
   <script>
     // ====== داده‌ها ======
     const catalog = {
+            diamond: {
+        type: 'group',
+        label: '💎 طرح الماس',
+        children: {
+          dia60: { label: "💎 الماس ۶۰٪ (۱۲ماهه) ",  type: "termYield", termMonths: 12, termYield: 0.60, min: 5_000_000 },
+          dia63: { label: "💎 الماس ۶۳٪ (۱۲ماهه) ", type: "termYield", termMonths: 12, termYield: 0.63, min: 30_000_000 },
+          dia66: { label: "💎 الماس ۶۶٪ (۱۲ماهه)",type: "termYield", termMonths: 12, termYield: 0.66, min: 100_000_000 },
+        }
+      },
       special: {
         type: 'group',
         label: '🏆 طرح ویژه',
         children: {
-          gold120: { label: "🏅 ویژه ۱۲۰٪ (۲ساله)", type: "termYield", termMonths: 24, termYield: 1.20, min: 9000000 },
-          gold57:  { label: "🏅 ویژه ۵۷٪ (یکساله)",  type: "termYield", termMonths: 12, termYield: 0.57, min: 9000000 },
+          gold120: { label: "🏅 ویژه ۱۲۰٪ (24ماهه)", type: "termYield", termMonths: 24, termYield: 1.20, min: 9000000 },
+          gold57:  { label: "🏅 ویژه ۵۷٪ (12ماهه)",  type: "termYield", termMonths: 12, termYield: 0.57, min: 9000000 },
           gold25:  { label: "🏅 ویژه ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5000000 },
           gold9:   { label: "🏅 ویژه ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5000000 },
-        }
-      },
-      diamond: {
-        type: 'group',
-        label: '💎 طرح الماس',
-        children: {
-          dia60: { label: "💎 الماس ۶۰٪ (۱۲ماهه) — حداقل ۵,۰۰۰,۰۰۰",  type: "termYield", termMonths: 12, termYield: 0.60, min: 5_000_000 },
-          dia63: { label: "💎 الماس ۶۳٪ (۱۲ماهه) — حداقل ۳۰,۰۰۰,۰۰۰", type: "termYield", termMonths: 12, termYield: 0.63, min: 30_000_000 },
-          dia66: { label: "💎 الماس ۶۶٪ (۱۲ماهه) — حداقل ۱۰۰,۰۰۰,۰۰۰",type: "termYield", termMonths: 12, termYield: 0.66, min: 100_000_000 },
         }
       },
       hamrahi: { type: 'comingSoon', label: '♥️ طرح همراهی (بزودی)' }
