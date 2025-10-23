@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -6,17 +6,17 @@
   <title>ماشین‌حساب سود سرمایه‌گذاری ریپی</title>
   <style>
     :root{
-      --primary:#121212; --accent:#4332BD; --accent2:#E96742; --ink:#2d0c59;
+      --primary:#121212; --accent:#4332BD; --ink:#2d0c59;
       --muted:#666; --border:#ddd; --bg:#f5f5f5; --card:#fff;
       --radius:20px; --shadow:0 6px 20px rgba(0,0,0,.06);
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{font-family:IranSans,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:0;text-align:center}
-    .container{max-width:460px;background:var(--card);margin:30px auto;padding:24px;border-radius:calc(var(--radius) + 5px);box-shadow:var(--shadow);text-align:right}
+    body{font-family:IranSans,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:0}
+    .container{max-width:460px;background:var(--card);margin:30px auto;padding:24px;border-radius:calc(var(--radius) + 5px);box-shadow:var(--shadow)}
+    .center{text-align:center}
     img.logo{width:90px;display:block;margin:0 auto 10px}
-    h1{font-size:22px;margin:10px 0;text-align:center}
-    p{font-size:14px;margin:0 0 16px;line-height:1.9;text-align:center}
+    h1{font-size:22px;margin:10px 0}
+    p{font-size:14px;margin:0 0 16px;line-height:1.9}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
     .row.onecol{grid-template-columns:1fr}
     label.mini{font-size:12px;color:var(--muted);display:block;margin:4px 2px}
@@ -27,36 +27,34 @@
     .result{background:#fafafa;padding:18px;border-radius:14px;line-height:1.9;white-space:pre-line;min-height:80px}
     .btn{background:var(--primary);color:#fff;border:none;padding:14px;font-size:16px;border-radius:12px;cursor:pointer;width:100%;margin:8px 0 16px}
     .btn:active{transform:translateY(1px)}
-    .btn-secondary{background:var(--accent)}
     .btn-ghost{background:#fff;color:#111;border:1px solid var(--border)}
     .actions{display:flex;gap:8px;margin-top:10px}
     .actions .btn{flex:1;padding:10px;margin:0}
     a.btn-primary{display:block;text-decoration:none;text-align:center;background:var(--primary);color:#fff;border-radius:12px;padding:14px;margin:8px 0 16px}
-    a.btn-primary:active{transform:translateY(1px)}
     .usage-counter{margin-top:10px;font-size:14px;color:#555;text-align:center}
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
-    <h1>ماشین حساب سود سرمایه‌گذاری</h1>
-    <p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود.</p>
-
-    <div style="margin-bottom:12px">
-      <button id="btnOpenModal" type="button" class="btn btn-secondary">دانلود اپلیکیشن</button>
+    <div class="center">
+      <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
+      <h1>ماشین حساب سود سرمایه‌گذاری</h1>
+      <p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود.</p>
     </div>
 
+    <!-- طرح‌ها + زیرطرح -->
     <div class="row" id="planRow">
       <div id="catWrap">
         <label class="mini" for="category">طرح‌ها</label>
         <select id="category" aria-label="طرح‌ها"></select>
       </div>
-      <div id="subWrap" style="display:none">
+      <div id="subWrap">
         <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
         <select id="subplan" aria-label="زیرطرح"></select>
       </div>
     </div>
 
+    <!-- مبلغ -->
     <label class="mini" for="amount">مبلغ سرمایه (تومان)</label>
     <input id="amount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="مبلغ سرمایه (تومان)" aria-invalid="false" />
     <div id="amountError" class="error" aria-live="polite"></div>
@@ -76,7 +74,7 @@
   </div>
 
   <script>
-    // فقط طرح ویژه و همراهی
+    // فقط «طرح ویژه» و «همراهی»
     const catalog = {
       special: {
         type: 'group',
@@ -91,75 +89,199 @@
       hamrahi: { type: 'comingSoon', label: '♥️ طرح همراهی (بزودی)' }
     };
 
+    // فرمت عدد و ورودی
     const nfFA = new Intl.NumberFormat('fa-IR');
     const formatNumber = (n) => nfFA.format(n);
+    function normalizeDigits(str){
+      const fa='۰۱۲۳۴۵۶۷۸۹', ar='٠١٢٣٤٥٦٧٨٩';
+      return (str||'').replace(/[\u06F0-\u06F9\u0660-\u0669]/g,d=>{
+        const i=fa.indexOf(d); if(i>-1) return String(i);
+        const j=ar.indexOf(d); if(j>-1) return String(j);
+        return d;
+      });
+    }
+    function numberFromInput(val){
+      const normalized = normalizeDigits(val);
+      const raw = normalized.replace(/[^\d]/g,'');
+      return raw ? Math.min(parseInt(raw,10), Number.MAX_SAFE_INTEGER) : NaN;
+    }
+    function formatInputAmount(e){
+      const input=e.target;
+      const n=numberFromInput(input.value);
+      if(Number.isNaN(n)){ input.value=''; return; }
+      input.value = formatNumber(n);
+    }
+    function setError(msg){
+      const el = document.getElementById('amountError');
+      const inp = document.getElementById('amount');
+      el.textContent = msg || '';
+      inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    }
 
-    function normalizeDigits(str){const fa='۰۱۲۳۴۵۶۷۸۹', ar='٠١٢٣٤٥٦٧٨٩';return (str||'').replace(/[\u06F0-\u06F9\u0660-\u0669]/g,d=>{const i=fa.indexOf(d);if(i>-1)return String(i);const j=ar.indexOf(d);if(j>-1)return String(j);return d;});}
-    function numberFromInput(val){const normalized = normalizeDigits(val);const raw = normalized.replace(/[^\d]/g,'');return raw ? parseInt(raw,10) : NaN;}
-    function formatInputAmount(e){const input=e.target;const n=numberFromInput(input.value);if(Number.isNaN(n)){input.value='';return;}input.value=formatNumber(n);}
-    function setError(msg){const el=document.getElementById('amountError');const inp=document.getElementById('amount');el.textContent=msg||'';inp.setAttribute('aria-invalid',msg?'true':'false');}
+    // محاسبات
+    function calcTermYield(P, termYield, termMonths){
+      const profit = Math.round(P * termYield);
+      const monthly = Math.round(profit / termMonths);
+      return { profit, monthly, finalAmount: P + profit };
+    }
 
-    function calcTermYield(P, termYield, termMonths){const profit=Math.round(P*termYield);const monthly=Math.round(profit/termMonths);return{profit,monthly,finalAmount:P+profit};}
-    function updateAmountPlaceholder(min){const txt=min>0?`حداقل مبلغ ${formatNumber(min)} تومان`:'مبلغ سرمایه (تومان)';document.getElementById('amount').placeholder=txt;}
+    // UI helpers
+    function updateAmountPlaceholder(min){
+      const txt = min>0 ? `حداقل مبلغ ${formatNumber(min)} تومان` : 'مبلغ سرمایه (تومان)';
+      document.getElementById('amount').placeholder = txt;
+    }
+    function updateCtaLink(params = {}){
+      const a = document.getElementById('ctaStart');
+      const url = new URL('https://my.repay.pro');
+      Object.entries(params).forEach(([k,v])=>{
+        if(v!==undefined && v!==null && v!=='') url.searchParams.set(k,String(v));
+      });
+      a.href = url.toString();
+    }
+    function setRowCols(hasSub){
+      const row = document.getElementById('planRow');
+      row.classList.toggle('onecol', !hasSub);
+      document.getElementById('subWrap').style.display = hasSub ? '' : 'none';
+    }
+
+    // منطق انتخاب
+    function fillCategories(){
+      const catSel = document.getElementById('category');
+      catSel.innerHTML = '';
+      // فقط special و hamrahi را اضافه می‌کنیم
+      ['special','hamrahi'].forEach(key=>{
+        const obj = catalog[key];
+        const opt = document.createElement('option');
+        opt.value = key; opt.textContent = obj.label;
+        catSel.appendChild(opt);
+      });
+    }
 
     function onCategoryChange(){
-      const catKey=document.getElementById('category').value;
-      const cat=catalog[catKey];
-      const subSel=document.getElementById('subplan');
-      const calcBtn=document.getElementById('calcBtn');
-      const resultEl=document.getElementById('result');
-      subSel.innerHTML='';resultEl.textContent='';setError('');
-      if(cat.type==='group'){
+      const catKey = document.getElementById('category').value;
+      const cat = catalog[catKey];
+      const subSel = document.getElementById('subplan');
+      const calcBtn = document.getElementById('calcBtn');
+      const resultEl = document.getElementById('result');
+
+      // reset
+      subSel.innerHTML = '';
+      setError('');
+      resultEl.textContent = '';
+
+      if(cat.type === 'group'){
+        // زیرطرح‌ها را پر کن
         Object.entries(cat.children).forEach(([k,pl])=>{
           const opt=document.createElement('option');
-          opt.value=k;opt.textContent=pl.label;subSel.appendChild(opt);
+          opt.value = k; opt.textContent = pl.label;
+          subSel.appendChild(opt);
         });
-        subSel.style.display='';updateAmountPlaceholder(Object.values(cat.children)[0].min);
+        setRowCols(true);
+        subSel.value = Object.keys(cat.children)[0];
+        const chosen = cat.children[subSel.value];
+        updateAmountPlaceholder(chosen.min);
+        calcBtn.disabled = false;
+        updateCtaLink({category: catKey, sub: subSel.value});
       }else{
-        subSel.style.display='none';
-        resultEl.textContent='این طرح در حال حاضر فعال نیست.';
-        calcBtn.disabled=true;
+        // همراهی (بزودی)
+        setRowCols(false);
+        calcBtn.disabled = true;
+        updateAmountPlaceholder(0);
+        resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
       }
     }
 
     function onSubplanChange(){
-      const cat=catalog[document.getElementById('category').value];
-      const subKey=document.getElementById('subplan').value;
-      if(!cat.children[subKey])return;
-      updateAmountPlaceholder(cat.children[subKey].min);
+      const catKey = document.getElementById('category').value;
+      const subKey = document.getElementById('subplan').value;
+      const cat = catalog[catKey];
+      if(!subKey || !cat?.children?.[subKey]) return;
+      const pl = cat.children[subKey];
+      updateAmountPlaceholder(pl.min);
+      document.getElementById('result').textContent = '';
+      setError('');
+      updateCtaLink({category: catKey, sub: subKey});
     }
 
+    // محاسبه
     function calculate(){
-      const catKey=document.getElementById('category').value;
-      const cat=catalog[catKey];
-      const amount=numberFromInput(document.getElementById('amount').value);
-      if(Number.isNaN(amount)){setError('مبلغ را وارد کنید.');return;}
-      if(cat.type!=='group'){setError('طرح انتخابی فعال نیست.');return;}
-      const subKey=document.getElementById('subplan').value;
-      const plan=cat.children[subKey];
-      if(amount<plan.min){setError(`حداقل مبلغ ${formatNumber(plan.min)} تومان است.`);return;}
-      setError('');
-      const out=calcTermYield(amount,plan.termYield,plan.termMonths);
-      document.getElementById('result').textContent=
-`مدت: ${plan.termMonths} ماهه
+      const catKey = document.getElementById('category').value;
+      const cat = catalog[catKey];
+      const amountVal = document.getElementById('amount').value;
+      const amount = numberFromInput(amountVal);
+      const resultEl = document.getElementById('result');
+
+      if(Number.isNaN(amount)){
+        setError('مبلغ را وارد کنید.');
+        return;
+      }
+      if(amount <= 0){
+        setError('مبلغ باید بزرگ‌تر از صفر باشد.');
+        return;
+      }
+
+      if(cat.type === 'group'){
+        const subKey = document.getElementById('subplan').value;
+        const plan = cat.children[subKey];
+
+        if(amount < plan.min){
+          setError(`حداقل مبلغ برای «${plan.label}» ${formatNumber(plan.min)} تومان است.`);
+          return;
+        }
+        setError('');
+
+        const out = calcTermYield(amount, plan.termYield, plan.termMonths);
+        const text =
+`طرح: ${plan.label}
+مدت: ${plan.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل: ${formatNumber(out.profit)} تومان
-مبلغ نهایی: ${formatNumber(out.finalAmount)} تومان`;
+مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
+
+        resultEl.textContent = text;
+        updateCtaLink({category: catKey, sub: subKey, amount, months: plan.termMonths});
+      } else {
+        resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
+      }
     }
 
-    document.addEventListener('DOMContentLoaded',()=>{
-      const catSel=document.getElementById('category');
-      Object.entries(catalog).forEach(([k,v])=>{
-        const opt=document.createElement('option');
-        opt.value=k;opt.textContent=v.label;
-        catSel.appendChild(opt);
-      });
-      catSel.value='special';
+    // کپی و اشتراک‌گذاری
+    async function copyResult(){
+      const btn = document.getElementById('btnCopy');
+      const text = document.getElementById('result').textContent.trim();
+      if(!text){ btn.style.transform='translateX(-3px)'; setTimeout(()=>btn.style.transform='none',160); return; }
+      try{ await navigator.clipboard.writeText(text); const old=btn.textContent; btn.textContent='کپی شد ✅'; btn.disabled=true; setTimeout(()=>{btn.textContent=old; btn.disabled=false;},1500);}catch(_){}
+    }
+    async function shareResult(){
+      const btn = document.getElementById('btnShare');
+      const text = document.getElementById('result').textContent.trim();
+      if(!text){ btn.style.transform='translateX(-3px)'; setTimeout(()=>btn.style.transform='none',160); return; }
+      const url = document.getElementById('ctaStart').href;
+      const payload = { title: 'نتیجه محاسبه ریپی', text, url };
+      if(navigator.share){
+        try{ await navigator.share(payload); const old=btn.textContent; btn.textContent='اشتراک‌گذاری شد ✅'; btn.disabled=true; setTimeout(()=>{btn.textContent=old; btn.disabled=false;},1500);}catch(_){}
+      }else{
+        try{ await navigator.clipboard.writeText(text + '\n' + url); const old=btn.textContent; btn.textContent='متن کپی شد ✅'; btn.disabled=true; setTimeout(()=>{btn.textContent=old; btn.disabled=false;},1500);}catch(_){}
+      }
+    }
+
+    // init
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // فقط special و hamrahi را نمایش بده
+      fillCategories();
+
+      // پیش‌فرض: طرح ویژه
+      const catSel = document.getElementById('category');
+      catSel.value = 'special';
       onCategoryChange();
-      document.getElementById('category').addEventListener('change',onCategoryChange);
-      document.getElementById('subplan').addEventListener('change',onSubplanChange);
-      document.getElementById('calcBtn').addEventListener('click',calculate);
-      document.getElementById('amount').addEventListener('input',formatInputAmount);
+
+      // لیسنرها
+      document.getElementById('category').addEventListener('change', onCategoryChange);
+      document.getElementById('subplan').addEventListener('change', onSubplanChange);
+      document.getElementById('calcBtn').addEventListener('click', calculate);
+      document.getElementById('amount').addEventListener('input', formatInputAmount);
+      document.getElementById('btnCopy').addEventListener('click', copyResult);
+      document.getElementById('btnShare').addEventListener('click', shareResult);
     });
   </script>
 </body>
