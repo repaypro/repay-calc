@@ -55,6 +55,13 @@
       line-height:1.9;
     }
 
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 8px;
+      line-height:1.8;
+    }
+
     .row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -210,6 +217,16 @@
       <p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود، سپس مبلغ سرمایه را وارد و روی «محاسبه» کلیک کنید.</p>
     </div>
 
+    <p class="note">
+      در طرح بلک فرایدی می‌توانید بین دو گزینه ۶۱٪ (۱۲ماهه) و ۱۲۶٪ (۲۴ماهه) با حداقل سرمایه‌گذاری ۹٫۰۰۰٫۰۰۰ تومان انتخاب کنید.
+    </p>
+    <p class="note">
+      با شرکت در طرح‌های طلایی می‌توانید در «طرح هدیه بلک فرایدی» تا سقف ۹۰٫۰۰۰٫۰۰۰ تومان هدیه دریافت کنید (۶٪ از کل مبلغ سرمایه‌گذاری‌شده، با سقف ۹۰٫۰۰۰٫۰۰۰ تومان).
+    </p>
+    <p class="note">
+      در صورت انتخاب طرح طلایی ۱۱۴٪، علاوه بر هدیهٔ فوق، ۳٪ از کل مبلغ سرمایه‌گذاری‌شده نیز به‌صورت جداگانه به‌عنوان پاداش اضافه به شما تعلق می‌گیرد.
+    </p>
+
     <!-- طرح‌ها + زیرطرح -->
     <div class="row" id="planRow">
       <div id="catWrap">
@@ -253,27 +270,45 @@
     >همین الان شروع کن</a>
 
     <div class="usage-counter">
-      📊 تعداد محاسبه این دستگاه در مرورگر شما: <span id="useCount">0</span>
+      📊 تعداد کل محاسبه‌های ثبت‌شده با این ماشین‌حساب: <span id="useCount">0</span>
     </div>
   </div>
 
   <script>
-    // کاتالوگ طرح‌ها
+    // =======================
+    // Catalog of plans
+    // =======================
     const catalog = {
       special: {
         type: 'group',
-        label: '🏆 طرح ویژه',
+        label: '🏆 طرح ویژه (طلایی)',
         children: {
-          gold114: { label: "🏅 ویژه ۱۱۴٪ (۲۴ماهه)", type: "termYield", termMonths: 24, termYield: 1.14, min: 5_000_000 },
-          gold52:  { label: "🏅 ویژه ۵۲٪ (۱۲ماهه)",  type: "termYield", termMonths: 12, termYield: 0.52, min: 5_000_000 },
-          gold25:  { label: "🏅 ویژه ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5_000_000 },
-          gold9:   { label: "🏅 ویژه ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5_000_000 },
+          gold114: { label: "🏅 طلایی ۱۱۴٪ (۲۴ماهه)", type: "termYield", termMonths: 24, termYield: 1.14, min: 5_000_000 },
+          gold52:  { label: "🏅 طلایی ۵۲٪ (۱۲ماهه)",  type: "termYield", termMonths: 12, termYield: 0.52, min: 5_000_000 },
+          gold25:  { label: "🏅 طلایی ۲۵٪ (۶ماهه)",   type: "termYield", termMonths: 6,  termYield: 0.25, min: 5_000_000 },
+          gold9:   { label: "🏅 طلایی ۹٪ (۳ماهه)",    type: "termYield", termMonths: 3,  termYield: 0.09, min: 5_000_000 },
         }
       },
-      hamrahi: { type: 'comingSoon', label: '♥️ طرح همراهی (بزودی)' }
+      blackFriday: {
+        type: 'group',
+        label: '🖤 طرح بلک فرایدی',
+        children: {
+          bf61:  { label: "🖤 بلک فرایدی ۶۱٪ (۱۲ماهه)",  type: "termYield", termMonths: 12, termYield: 0.61, min: 9_000_000 },
+          bf126: { label: "🖤 بلک فرایدی ۱۲۶٪ (۲۴ماهه)", type: "termYield", termMonths: 24, termYield: 1.26, min: 9_000_000 },
+        }
+      },
+      hamrahi: {
+        type: 'comingSoon',
+        label: '♥️ طرح همراهی (بزودی)'
+      }
     };
 
-    // فرمت عدد و ورودی
+    // هدیه بلک فرایدی
+    const GIFT_CAP = 90_000_000; // سقف هدیه ۹۰ میلیون
+
+    // =======================
+    // Number formatting & input utils
+    // =======================
     const nfFA = new Intl.NumberFormat('fa-IR');
     const formatNumber = (n) => nfFA.format(n);
 
@@ -306,14 +341,31 @@
       inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
     }
 
-    // محاسبات (سود ساده برای کل دوره)
+    // =======================
+    // Core financial calculation (simple total yield)
+    // =======================
     function calcTermYield(P, termYield, termMonths){
       const profit = Math.round(P * termYield);
       const monthly = Math.round(profit / termMonths);
       return { profit, monthly, finalAmount: P + profit };
     }
 
+    // هدیه بلک فرایدی برای طرح‌های طلایی
+    function calcGift(amount, catKey, subKey){
+      if (catKey !== 'special') return null; // فقط طرح‌های طلایی
+      const baseGift = Math.min(Math.round(amount * 0.06), GIFT_CAP); // ۶٪ تا سقف ۹۰M
+      let extraGift = 0;
+      if (subKey === 'gold114') {
+        // ۳٪ اضافه مخصوص طرح ۱۱۴٪
+        extraGift = Math.round(amount * 0.03);
+      }
+      const totalGift = baseGift + extraGift;
+      return { baseGift, extraGift, totalGift };
+    }
+
+    // =======================
     // UI helpers
+    // =======================
     function updateAmountPlaceholder(min){
       const txt = min>0 ? `حداقل مبلغ ${formatNumber(min)} تومان` : 'مبلغ سرمایه (تومان)';
       document.getElementById('amount').placeholder = txt;
@@ -348,31 +400,63 @@
       return plan ? { catKey, subKey, plan } : null;
     }
 
-    // usage counter
-    const USE_COUNT_KEY = 'repay_calc_use_count';
+    // =======================
+    // Global usage counter via Apps Script
+    // =======================
+    // آدرس Web App خودتان را اینجا قرار دهید:
+    const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycby5-PGZe8ukx8bcEu_W2W50jehX1owKv0MWmsbVeOT1Th7MHDDDv_T15ncRMBzhzlGo/exec'; // TODO: جایگزین با URL واقعی
+    const COUNTER_NS  = 'repay_calc';
+    const COUNTER_KEY = 'usage_count';
 
-    function loadUseCount() {
+    async function fetchUseCountFromServer() {
       const span = document.getElementById('useCount');
-      const stored = Number(localStorage.getItem(USE_COUNT_KEY) || '0');
-      const safeVal = Number.isFinite(stored) && stored >= 0 ? stored : 0;
-      span.textContent = safeVal;
-    }
-
-    function incrementUseCount() {
-      const span = document.getElementById('useCount');
-      const current = Number(span.textContent || '0');
-      const next = Number.isFinite(current) ? current + 1 : 1;
-      span.textContent = next;
       try {
-        localStorage.setItem(USE_COUNT_KEY, String(next));
-      } catch (_) {}
+        const url = `${COUNTER_API_URL}?op=get&ns=${encodeURIComponent(COUNTER_NS)}&key=${encodeURIComponent(COUNTER_KEY)}`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('Bad response');
+
+        const data = await res.json();
+        // پاسخ: { ok:true, value:<number> }
+        const count = Number(data.value);
+        span.textContent = Number.isFinite(count) && count >= 0 ? count : '0';
+      } catch (e) {
+        console.error('Failed to fetch global usage count', e);
+        if (!span.textContent) span.textContent = '0';
+      }
     }
 
-    // منطق انتخاب
+    async function incrementUseCountOnServer() {
+      const span = document.getElementById('useCount');
+      try {
+        const url = `${COUNTER_API_URL}?op=hit&ns=${encodeURIComponent(COUNTER_NS)}&key=${encodeURIComponent(COUNTER_KEY)}&v=1`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('Bad response');
+
+        const data = await res.json();
+        // پاسخ: { ok:true, value:<number جدید> }
+        const count = Number(data.value);
+        if (Number.isFinite(count) && count >= 0) {
+          span.textContent = count;
+        }
+      } catch (e) {
+        console.error('Failed to increment global usage count', e);
+      }
+    }
+
+    // =======================
+    // Plan selection logic
+    // =======================
     function fillCategories(){
       const catSel = document.getElementById('category');
       catSel.innerHTML = '';
-      ['special','hamrahi'].forEach(key=>{
+      // ترتیب نمایش: طلایی، بلک فرایدی، همراهی
+      ['special','blackFriday','hamrahi'].forEach(key=>{
         const obj = catalog[key];
         const opt = document.createElement('option');
         opt.value = key;
@@ -427,7 +511,9 @@
       updateCtaLink({category: catKey, sub: subKey});
     }
 
-    // محاسبه
+    // =======================
+    // Calculation handler
+    // =======================
     function calculate(){
       const cat = getSelectedCategory();
       const amountVal = document.getElementById('amount').value;
@@ -458,22 +544,40 @@
         setError('');
 
         const out = calcTermYield(amount, plan.termYield, plan.termMonths);
-        const text =
+
+        let text =
 `طرح: ${plan.label}
 مدت: ${plan.termMonths} ماهه
 سود ماهانه: ${formatNumber(out.monthly)} تومان
 سود کل دوره: ${formatNumber(out.profit)} تومان
 مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
 
+        // هدیه بلک فرایدی برای طرح‌های طلایی
+        const gift = calcGift(amount, catKey, subKey);
+        if (gift && gift.totalGift > 0) {
+          text += `
+
+🎁 طرح هدیه بلک فرایدی:
+هدیه اصلی (۶٪ مبلغ، تا سقف ${formatNumber(GIFT_CAP)} تومان): ${formatNumber(gift.baseGift)} تومان`;
+          if (gift.extraGift > 0) {
+            text += `
+هدیه اضافی ۳٪ ویژه طرح ۱۱۴٪: ${formatNumber(gift.extraGift)} تومان`;
+          }
+          text += `
+جمع کل هدایا: ${formatNumber(gift.totalGift)} تومان`;
+        }
+
         resultEl.textContent = text;
         updateCtaLink({category: catKey, sub: subKey, amount, months: plan.termMonths});
-        incrementUseCount();
+        incrementUseCountOnServer();
       } else {
         resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
       }
     }
 
-    // کپی و اشتراک‌گذاری
+    // =======================
+    // Copy & share handlers
+    // =======================
     async function copyResult(){
       const btn = document.getElementById('btnCopy');
       const text = document.getElementById('result').textContent.trim();
@@ -529,11 +633,17 @@
       }
     }
 
-    // init
+    // =======================
+    // Init
+    // =======================
     document.addEventListener('DOMContentLoaded', ()=>{
-      loadUseCount();
+      // شمارندهٔ سراسری از Google Apps Script
+      fetchUseCountFromServer();
+
+      // پر کردن دسته‌ها
       fillCategories();
 
+      // پیش‌فرض: طرح ویژه طلایی
       const catSel = document.getElementById('category');
       catSel.value = 'special';
       onCategoryChange();
