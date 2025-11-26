@@ -3,37 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ماشین‌حساب سود سرمایه‌گذاری ریپی</title>
+  <title>ماشین‌حساب سود سرمایه‌گذاری ریپی – بلک فرایدی</title>
   <style>
     :root{
-      --primary:#121212;
-      --accent:#4332BD;
-      --ink:#2d0c59;
-      --muted:#666;
-      --border:#ddd;
-      --bg:#f5f5f5;
-      --card:#fff;
-      --radius:20px;
-      --shadow:0 6px 20px rgba(0,0,0,.06);
+      --bg:#050509;
+      --card:#090910;
+      --ink:#f5f3ff;
+      --muted:#b0a6d6;
+      --primary:#f9d976;      /* طلایی برای دکمه‌ها */
+      --primary-text:#1a132a; /* رنگ متن روی دکمه طلایی */
+      --accent:#ff0044;       /* قرمز بلک فرایدی */
+      --border:rgba(249,217,118,0.4);
+      --radius:22px;
+      --shadow:0 18px 40px rgba(0,0,0,.75);
     }
 
     *{box-sizing:border-box}
 
     body{
       font-family:IranSans,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:var(--bg);
+      background:
+        radial-gradient(circle at top, #22142f 0, #050509 55%, #020105 100%),
+        repeating-linear-gradient(135deg,
+          rgba(249,217,118,0.10) 0,
+          rgba(249,217,118,0.10) 1px,
+          transparent 1px,
+          transparent 14px);
       color:var(--ink);
       margin:0;
       padding:0;
+      min-height:100vh;
+      overflow-x:hidden;
     }
 
     .container{
-      max-width:460px;
-      background:var(--card);
-      margin:24px auto;
-      padding:24px;
-      border-radius:calc(var(--radius) + 5px);
+      position:relative;
+      max-width:480px;
+      background:radial-gradient(circle at top left,#181227 0,#090910 55%,#050308 100%);
+      margin:28px auto;
+      padding:24px 22px 26px;
+      border-radius:calc(var(--radius) + 4px);
       box-shadow:var(--shadow);
+      border:1px solid var(--border);
+      overflow:hidden;
+      z-index:10;
+    }
+
+    .container::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+        conic-gradient(from 220deg,
+          rgba(249,217,118,0.0) 0deg,
+          rgba(249,217,118,0.12) 80deg,
+          rgba(249,217,118,0.0) 140deg,
+          rgba(249,217,118,0.16) 220deg,
+          rgba(249,217,118,0.0) 300deg);
+      opacity:0.45;
+      mix-blend-mode:screen;
+      pointer-events:none;
+    }
+
+    .container-inner{
+      position:relative;
+      z-index:1;
     }
 
     .center{text-align:center}
@@ -42,23 +76,45 @@
       width:90px;
       display:block;
       margin:0 auto 10px;
+      filter:drop-shadow(0 0 10px rgba(0,0,0,.6));
     }
 
     h1{
       font-size:22px;
-      margin:10px 0;
+      margin:10px 0 4px;
+    }
+
+    .bf-tagline{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      color:var(--muted);
+      background:rgba(255,0,68,0.12);
+      border-radius:999px;
+      padding:4px 10px;
+      margin-bottom:10px;
+      border:1px solid rgba(255,0,68,0.35);
+    }
+
+    .bf-tagline span.dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 8px rgba(255,0,68,0.7);
     }
 
     p{
       font-size:14px;
-      margin:0 0 16px;
+      margin:0 0 10px;
       line-height:1.9;
     }
 
     .note{
       font-size:12px;
       color:var(--muted);
-      margin:0 0 8px;
+      margin:0 0 6px;
       line-height:1.8;
     }
 
@@ -83,81 +139,99 @@
     select,
     input[type="text"]{
       width:100%;
-      padding:12px;
-      margin-bottom:12px;
-      font-size:15px;
-      border-radius:12px;
-      border:1px solid #ccc;
+      padding:11px 11px;
+      margin-bottom:10px;
+      font-size:14px;
+      border-radius:13px;
+      border:1px solid rgba(255,255,255,0.14);
       text-align:right;
-      background:#fff;
-      transition:border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      background:rgba(10,10,18,0.92);
+      color:var(--ink);
+      transition:border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.05s ease;
     }
 
     input[type="text"]{direction:ltr}
 
     select:focus,
     input[type="text"]:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 2px rgba(67,50,189,0.14);
+      border-color:var(--primary);
+      box-shadow:0 0 0 1px rgba(249,217,118,0.6);
       outline:none;
+      background:rgba(14,14,24,0.98);
     }
 
     input[aria-invalid="true"]{
-      border-color:#d33;
-      outline-color:#d33;
-      box-shadow:0 0 0 2px rgba(211,51,51,0.16);
+      border-color:#ff4a4a;
+      box-shadow:0 0 0 1px rgba(255,74,74,0.6);
     }
 
     .error{
-      color:#d33;
+      color:#ff6b7f;
       font-size:12px;
       min-height:18px;
-      margin:-6px 0 10px;
+      margin:-4px 0 10px;
     }
 
     .result{
-      background:#fafafa;
-      padding:18px;
-      border-radius:14px;
+      background:linear-gradient(145deg,rgba(22,18,36,0.96),rgba(8,6,18,0.98));
+      padding:16px 14px;
+      border-radius:16px;
       line-height:1.9;
       white-space:pre-line;
       min-height:80px;
       font-size:14px;
-      transition:background 0.2s ease, transform 0.1s ease;
+      border:1px solid rgba(249,217,118,0.24);
+      box-shadow:0 0 0 1px rgba(0,0,0,0.85);
+      margin-top:4px;
     }
 
     .btn{
-      background:var(--primary);
-      color:#fff;
+      background:linear-gradient(135deg,#f9e19c,#f9d976,#f5c35c);
+      color:var(--primary-text);
       border:none;
-      padding:14px;
-      font-size:16px;
-      border-radius:12px;
+      padding:13px 14px;
+      font-size:15px;
+      font-weight:600;
+      border-radius:999px;
       cursor:pointer;
       width:100%;
-      margin:8px 0 16px;
-      transition:box-shadow 0.15s ease, transform 0.1s ease, background 0.15s ease;
+      margin:8px 0 10px;
+      transition:box-shadow 0.15s ease, transform 0.08s ease, filter 0.12s ease;
     }
 
     .btn:hover{
-      box-shadow:0 8px 24px rgba(0,0,0,.10);
+      box-shadow:0 10px 26px rgba(0,0,0,.7);
+      filter:brightness(1.05);
     }
 
     .btn:active{
-      transform:translateY(1px);
+      transform:translateY(1px) scale(0.99);
       box-shadow:none;
     }
 
     .btn[disabled]{
-      opacity:0.7;
+      opacity:0.6;
       cursor:not-allowed;
       box-shadow:none;
+      filter:grayscale(0.2);
     }
 
     .btn-ghost{
-      background:#fff;
-      color:#111;
-      border:1px solid var(--border);
+      background:rgba(10,10,18,0.9);
+      color:var(--ink);
+      border:1px solid rgba(255,255,255,0.18);
+      font-weight:500;
+    }
+
+    .btn-ghost:hover{
+      background:rgba(36,28,58,0.98);
+    }
+
+    .btn-secondary{
+      background:rgba(10,10,18,0.95);
+      color:var(--primary);
+      border:1px solid rgba(249,217,118,0.5);
+      font-weight:500;
     }
 
     .actions{
@@ -168,109 +242,367 @@
 
     .actions .btn{
       flex:1;
-      padding:10px;
+      padding:10px 0;
       margin:0;
+      border-radius:999px;
+      font-size:13px;
     }
 
     a.btn-primary{
       display:block;
       text-decoration:none;
       text-align:center;
-      background:var(--primary);
-      color:#fff;
-      border-radius:12px;
-      padding:14px;
-      margin:8px 0 16px;
+      background:linear-gradient(135deg,#f9e19c,#f9d976,#f5c35c);
+      color:var(--primary-text);
+      border-radius:999px;
+      padding:13px 14px;
+      margin:8px 0 4px;
       font-size:15px;
-      transition:box-shadow 0.15s ease, transform 0.1s ease, background 0.15s ease;
+      font-weight:600;
+      box-shadow:0 10px 26px rgba(0,0,0,.7);
+      transition:box-shadow 0.15s ease, transform 0.08s ease, filter 0.12s ease;
     }
 
     a.btn-primary:hover{
-      box-shadow:0 8px 24px rgba(0,0,0,.10);
+      filter:brightness(1.05);
     }
 
     a.btn-primary:active{
-      transform:translateY(1px);
+      transform:translateY(1px) scale(0.99);
       box-shadow:none;
     }
 
     .usage-counter{
       margin-top:10px;
-      font-size:14px;
-      color:#555;
+      font-size:12px;
+      color:var(--muted);
       text-align:center;
+    }
+
+    /* Download modal (glass) */
+
+    .download-trigger{
+      margin-top:10px;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:100;
+    }
+
+    .modal.active{
+      display:flex;
+    }
+
+    .modal::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.72);
+      backdrop-filter:blur(10px);
+    }
+
+    .modal-box{
+      position:relative;
+      max-width:360px;
+      width:86%;
+      background:linear-gradient(145deg,rgba(22,18,36,0.92),rgba(8,6,18,0.96));
+      border-radius:20px;
+      padding:18px 16px 16px;
+      border:1px solid rgba(249,217,118,0.5);
+      box-shadow:0 20px 40px rgba(0,0,0,0.9);
+      z-index:1;
+    }
+
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+    }
+
+    .modal-title{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .modal-close{
+      background:transparent;
+      color:var(--muted);
+      border:none;
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      padding:2px 6px;
+    }
+
+    .modal-body{
+      margin-top:4px;
+    }
+
+    .download-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:6px;
+    }
+
+    .download-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:14px;
+      background:rgba(12,10,22,0.96);
+      border:1px solid rgba(255,255,255,0.1);
+      transition:background 0.15s ease, transform 0.08s ease, border-color 0.15s ease;
+    }
+
+    .download-item:hover{
+      background:rgba(26,18,44,0.98);
+      border-color:rgba(249,217,118,0.5);
+      transform:translateY(-1px);
+    }
+
+    .download-icon{
+      width:28px;
+      height:28px;
+      border-radius:8px;
+      object-fit:contain;
+      background:#fff;
+      flex-shrink:0;
+    }
+
+    .download-text-main{
+      font-size:13px;
+      color:var(--ink);
+      display:block;
+    }
+
+    .download-text-sub{
+      font-size:11px;
+      color:var(--muted);
+      display:block;
+    }
+
+    /* Balloons & coins layers */
+
+    .balloon-layer,
+    .coin-layer{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:5;
+    }
+
+    .coin-layer{
+      z-index:60;
+    }
+
+    .balloon{
+      position:absolute;
+      bottom:-60px;
+      width:34px;
+      height:46px;
+      background:radial-gradient(circle at 30% 30%, #ffd3e0 0, #ff0044 55%, #7a001f 100%);
+      border-radius:50% 50% 45% 45%;
+      box-shadow:0 0 14px rgba(255,0,80,0.7);
+      animation:balloon-up 12s linear forwards;
+    }
+
+    .balloon::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      bottom:-26px;
+      width:1px;
+      height:28px;
+      background:rgba(255,255,255,0.7);
+      transform:translateX(-50%);
+      opacity:0.7;
+    }
+
+    @keyframes balloon-up{
+      0%{transform:translateY(0);opacity:0;}
+      10%{opacity:1;}
+      100%{transform:translateY(-115vh);opacity:0;}
+    }
+
+    .coin{
+      position:absolute;
+      top:-40px;
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #fff7cc 0, #f6c453 40%, #b57b1a 100%);
+      box-shadow:0 0 10px rgba(249,217,118,0.85);
+      border:1px solid rgba(184,135,11,0.9);
+      animation:coin-fall 1.1s linear forwards;
+    }
+
+    @keyframes coin-fall{
+      0%{transform:translateY(0) rotateZ(0deg) scale(0.9);opacity:0;}
+      10%{opacity:1;}
+      100%{transform:translateY(110vh) rotateZ(540deg) scale(1.05);opacity:0;}
     }
 
     @media (max-width:480px){
       .container{
         margin:16px;
-        padding:18px;
+        padding:20px 16px 22px;
       }
     }
   </style>
 </head>
 <body>
+  <!-- لایه‌های افکت -->
+  <div class="balloon-layer" aria-hidden="true"></div>
+  <div class="coin-layer" aria-hidden="true"></div>
+
   <div class="container">
-    <div class="center">
-      <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
-      <h1>ماشین حساب سود سرمایه‌گذاری</h1>
-      <p>از باکس «طرح‌ها» گزینه را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود، سپس مبلغ سرمایه را وارد و روی «محاسبه» کلیک کنید.</p>
-    </div>
-
-    <p class="note">
-      در طرح بلک فرایدی می‌توانید بین دو گزینه ۶۱٪ (۱۲ماهه) و ۱۲۶٪ (۲۴ماهه) با حداقل سرمایه‌گذاری ۹٫۰۰۰٫۰۰۰ تومان انتخاب کنید.
-    </p>
-    <p class="note">
-      با شرکت در طرح‌های طلایی می‌توانید در «طرح هدیه بلک فرایدی» تا سقف ۹۰٫۰۰۰٫۰۰۰ تومان هدیه دریافت کنید (۶٪ از کل مبلغ سرمایه‌گذاری‌شده، با سقف ۹۰٫۰۰۰٫۰۰۰ تومان).
-    </p>
-    <p class="note">
-      در صورت انتخاب طرح طلایی ۱۱۴٪، علاوه بر هدیهٔ فوق، ۳٪ از کل مبلغ سرمایه‌گذاری‌شده نیز به‌صورت جداگانه به‌عنوان پاداش اضافه به شما تعلق می‌گیرد.
-    </p>
-
-    <!-- طرح‌ها + زیرطرح -->
-    <div class="row" id="planRow">
-      <div id="catWrap">
-        <label class="mini" for="category">طرح‌ها</label>
-        <select id="category" aria-label="طرح‌ها"></select>
+    <div class="container-inner">
+      <div class="center">
+        <img src="https://uploadkon.ir/uploads/8c7604_25file-0000000073346243969ca320550ec0a2.png" class="logo" alt="Repay Logo" />
+        <div class="bf-tagline">
+          <span class="dot"></span>
+          <span>بلک فرایدی ریپی – محاسبه سریع سود و هدیه سرمایه‌گذاری</span>
+        </div>
+        <h1>ماشین حساب سود سرمایه‌گذاری</h1>
+        <p>از باکس «طرح‌ها» گزینه موردنظر را انتخاب کنید؛ اگر زیرمجموعه داشت، باکس دوم فعال می‌شود، سپس مبلغ سرمایه را وارد کرده و روی «محاسبه» کلیک کنید.</p>
       </div>
-      <div id="subWrap">
-        <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
-        <select id="subplan" aria-label="زیرطرح"></select>
+
+      <p class="note">
+        در طرح بلک فرایدی می‌توانید بین دو گزینه ۶۱٪ (۱۲ماهه) و ۱۲۶٪ (۲۴ماهه) با حداقل سرمایه‌گذاری ۹٫۰۰۰٫۰۰۰ تومان یکی را انتخاب کنید.
+      </p>
+      <p class="note">
+        با شرکت در طرح‌های طلایی، در «طرح هدیه بلک فرایدی» می‌توانید تا سقف ۹۰٫۰۰۰٫۰۰۰ تومان هدیه نقدی دریافت کنید.
+      </p>
+      <p class="note">
+        در صورت انتخاب طرح طلایی ۱۱۴٪، علاوه بر هدیهٔ فوق، پاداش نقدی اضافه معادل ۳٪ از کل مبلغ سرمایه‌گذاری‌شده نیز به شما تعلق می‌گیرد.
+      </p>
+
+      <!-- طرح‌ها + زیرطرح -->
+      <div class="row" id="planRow">
+        <div id="catWrap">
+          <label class="mini" for="category">طرح‌ها</label>
+          <select id="category" aria-label="طرح‌ها"></select>
+        </div>
+        <div id="subWrap">
+          <label class="mini" for="subplan">انتخاب زیرطرح (مدت/درصد)</label>
+          <select id="subplan" aria-label="زیرطرح"></select>
+        </div>
+      </div>
+
+      <!-- مبلغ -->
+      <label class="mini" for="amount">مبلغ سرمایه (تومان)</label>
+      <input
+        id="amount"
+        type="text"
+        inputmode="numeric"
+        pattern="[0-9]*"
+        autocomplete="off"
+        placeholder="مبلغ سرمایه (تومان)"
+        aria-invalid="false"
+      />
+      <div id="amountError" class="error" aria-live="polite"></div>
+
+      <button id="calcBtn" class="btn" type="button">محاسبه</button>
+
+      <div class="result" id="result" aria-live="polite"></div>
+
+      <div class="actions">
+        <button id="btnCopy" class="btn btn-ghost" type="button">📋 کپی نتیجه</button>
+        <button id="btnShare" class="btn btn-ghost" type="button">📤 اشتراک‌گذاری</button>
+      </div>
+
+      <!-- دکمه دانلود اپلیکیشن -->
+      <div class="download-trigger">
+        <button id="btnDownload" class="btn btn-secondary" type="button">📱 دانلود اپلیکیشن</button>
+      </div>
+
+      <!-- دکمه اصلی شروع -->
+      <a
+        id="ctaStart"
+        class="btn-primary"
+        href="https://my.repay.pro"
+        target="_blank"
+        rel="noreferrer noopener"
+      >همین الان شروع کن</a>
+
+      <div class="usage-counter">
+        📊 تعداد کل محاسبه‌های ثبت‌شده با این ماشین‌حساب: <span id="useCount">0</span>
       </div>
     </div>
+  </div>
 
-    <!-- مبلغ -->
-    <label class="mini" for="amount">مبلغ سرمایه (تومان)</label>
-    <input
-      id="amount"
-      type="text"
-      inputmode="numeric"
-      pattern="[0-9]*"
-      autocomplete="off"
-      placeholder="مبلغ سرمایه (تومان)"
-      aria-invalid="false"
-    />
-    <div id="amountError" class="error" aria-live="polite"></div>
+  <!-- مودال شیشه‌ای دانلود اپلیکیشن -->
+  <div id="downloadModal" class="modal" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">دانلود اپلیکیشن ریپی</div>
+        <button type="button" class="modal-close" id="downloadClose" aria-label="بستن">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="note" style="margin-bottom:6px;">نسخه اپلیکیشن را از مارکت‌های معتبر یا نسخه وب‌اپلیکیشن اجرا کنید:</p>
+        <div class="download-list">
+          <a
+            class="download-item"
+            href="https://cafebazaar.ir/app/YOUR_APP_ID"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              class="download-icon"
+              src="https://webassets.cafebazaar.ir/images/bazaar-logo.svg"
+              alt="Cafe Bazaar"
+            />
+            <div>
+              <span class="download-text-main">دانلود از کافه‌بازار</span>
+              <span class="download-text-sub">بازار اپلیکیشن اندروید</span>
+            </div>
+          </a>
 
-    <button id="calcBtn" class="btn" type="button">محاسبه</button>
+          <a
+            class="download-item"
+            href="https://myket.ir/app/YOUR_APP_ID"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <!-- این لوگو را در صورت نیاز با آدرس رسمی مایکت جایگزین کنید -->
+            <img
+              class="download-icon"
+              src="https://static.cdnlogo.com/logos/m/24/myket.svg"
+              alt="Myket"
+            />
+            <div>
+              <span class="download-text-main">دانلود از مایکت</span>
+              <span class="download-text-sub">مارکت اندرویدی مایکت</span>
+            </div>
+          </a>
 
-    <div class="result" id="result" aria-live="polite"></div>
-
-    <div class="actions">
-      <button id="btnCopy" class="btn btn-ghost" type="button">📋 کپی نتیجه</button>
-      <button id="btnShare" class="btn btn-ghost" type="button">📤 اشتراک‌گذاری</button>
-    </div>
-
-    <a
-      id="ctaStart"
-      class="btn-primary"
-      href="https://my.repay.pro"
-      target="_blank"
-      rel="noreferrer noopener"
-    >همین الان شروع کن</a>
-
-    <div class="usage-counter">
-      📊 تعداد کل محاسبه‌های ثبت‌شده با این ماشین‌حساب: <span id="useCount">0</span>
+          <a
+            class="download-item"
+            href="https://my.repay.pro"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <div
+              class="download-icon"
+              style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%,#ffe7ba 0,#f9d976 45%,#b57b1a 100%);color:#1a132a;font-weight:700;font-size:15px;"
+            >W</div>
+            <div>
+              <span class="download-text-main">وب‌اپلیکیشن ریپی</span>
+              <span class="download-text-sub">اجرا از طریق مرورگر (بدون نصب)</span>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -350,7 +682,7 @@
       return { profit, monthly, finalAmount: P + profit };
     }
 
-    // هدیه بلک فرایدی برای طرح‌های طلایی
+    // هدیه بلک فرایدی برای طرح‌های طلایی (منطق داخلی – در UI فقط مبلغ هدیه نمایش داده می‌شود)
     function calcGift(amount, catKey, subKey){
       if (catKey !== 'special') return null; // فقط طرح‌های طلایی
       const baseGift = Math.min(Math.round(amount * 0.06), GIFT_CAP); // ۶٪ تا سقف ۹۰M
@@ -360,6 +692,7 @@
         extraGift = Math.round(amount * 0.03);
       }
       const totalGift = baseGift + extraGift;
+      if (totalGift <= 0) return null;
       return { baseGift, extraGift, totalGift };
     }
 
@@ -403,8 +736,8 @@
     // =======================
     // Global usage counter via Apps Script
     // =======================
-    // آدرس Web App خودتان را اینجا قرار دهید:
-    const COUNTER_API_URL = 'https://script.google.com/macros/s/AKfycby5-PGZe8ukx8bcEu_W2W50jehX1owKv0MWmsbVeOT1Th7MHDDDv_T15ncRMBzhzlGo/exec'; // TODO: جایگزین با URL واقعی
+    // این URL را با Web App URL واقعی Google Apps Script خودتان جایگزین کنید:
+    const COUNTER_API_URL = 'https://script.google.com/macros/s/XXXXXXXXXXXX/exec';
     const COUNTER_NS  = 'repay_calc';
     const COUNTER_KEY = 'usage_count';
 
@@ -419,7 +752,6 @@
         if (!res.ok) throw new Error('Bad response');
 
         const data = await res.json();
-        // پاسخ: { ok:true, value:<number> }
         const count = Number(data.value);
         span.textContent = Number.isFinite(count) && count >= 0 ? count : '0';
       } catch (e) {
@@ -439,7 +771,6 @@
         if (!res.ok) throw new Error('Bad response');
 
         const data = await res.json();
-        // پاسخ: { ok:true, value:<number جدید> }
         const count = Number(data.value);
         if (Number.isFinite(count) && count >= 0) {
           span.textContent = count;
@@ -450,13 +781,42 @@
     }
 
     // =======================
+    // Balloons & coins
+    // =======================
+    const balloonLayer = document.querySelector('.balloon-layer');
+    const coinLayer = document.querySelector('.coin-layer');
+
+    function spawnBalloon(){
+      if (!balloonLayer) return;
+      const el = document.createElement('div');
+      el.className = 'balloon';
+      el.style.left = (5 + Math.random()*90) + '%';
+      el.style.animationDuration = (10 + Math.random()*6) + 's';
+      balloonLayer.appendChild(el);
+      setTimeout(()=>{ el.remove(); }, 17000);
+    }
+
+    function triggerCoinRain(){
+      if (!coinLayer) return;
+      const count = 9 + Math.floor(Math.random()*4);
+      for (let i=0;i<count;i++){
+        const c = document.createElement('div');
+        c.className = 'coin';
+        c.style.left = (5 + Math.random()*90) + '%';
+        c.style.animationDelay = (Math.random()*0.2) + 's';
+        coinLayer.appendChild(c);
+        setTimeout(()=>{ c.remove(); }, 1300);
+      }
+    }
+
+    // =======================
     // Plan selection logic
     // =======================
     function fillCategories(){
       const catSel = document.getElementById('category');
       catSel.innerHTML = '';
-      // ترتیب نمایش: طلایی، بلک فرایدی، همراهی
-      ['special','blackFriday','hamrahi'].forEach(key=>{
+      // ترتیب: بلک‌فرایدی، طلایی، همراهی
+      ['blackFriday','special','hamrahi'].forEach(key=>{
         const obj = catalog[key];
         const opt = document.createElement('option');
         opt.value = key;
@@ -552,24 +912,25 @@
 سود کل دوره: ${formatNumber(out.profit)} تومان
 مبلغ قابل برداشت در سررسید: ${formatNumber(out.finalAmount)} تومان`;
 
-        // هدیه بلک فرایدی برای طرح‌های طلایی
+        // هدیه بلک فرایدی (فقط مبلغ، بدون اشاره به درصد)
         const gift = calcGift(amount, catKey, subKey);
         if (gift && gift.totalGift > 0) {
           text += `
 
 🎁 طرح هدیه بلک فرایدی:
-هدیه اصلی (۶٪ مبلغ، تا سقف ${formatNumber(GIFT_CAP)} تومان): ${formatNumber(gift.baseGift)} تومان`;
+هدیه نقدی اصلی: ${formatNumber(gift.baseGift)} تومان`;
           if (gift.extraGift > 0) {
             text += `
-هدیه اضافی ۳٪ ویژه طرح ۱۱۴٪: ${formatNumber(gift.extraGift)} تومان`;
+پاداش نقدی ویژه طرح ۱۱۴٪: ${formatNumber(gift.extraGift)} تومان`;
           }
           text += `
-جمع کل هدایا: ${formatNumber(gift.totalGift)} تومان`;
+جمع کل هدیه و پاداش: ${formatNumber(gift.totalGift)} تومان`;
         }
 
         resultEl.textContent = text;
         updateCtaLink({category: catKey, sub: subKey, amount, months: plan.termMonths});
         incrementUseCountOnServer();
+        triggerCoinRain();
       } else {
         resultEl.textContent = 'این طرح در حال حاضر فعال نیست.';
       }
@@ -634,18 +995,47 @@
     }
 
     // =======================
+    // Download modal
+    // =======================
+    function setupDownloadModal(){
+      const modal = document.getElementById('downloadModal');
+      const openBtn = document.getElementById('btnDownload');
+      const closeBtn = document.getElementById('downloadClose');
+      if (!modal || !openBtn || !closeBtn) return;
+
+      function open(){
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden','false');
+      }
+      function close(){
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden','true');
+      }
+
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e)=>{
+        if(e.target === modal) close();
+      });
+    }
+
+    // =======================
     // Init
     // =======================
     document.addEventListener('DOMContentLoaded', ()=>{
       // شمارندهٔ سراسری از Google Apps Script
       fetchUseCountFromServer();
 
+      // بادکنک اولیه و تکرارش
+      spawnBalloon();
+      setInterval(spawnBalloon, 8000 + Math.random()*4000);
+
       // پر کردن دسته‌ها
       fillCategories();
 
-      // پیش‌فرض: طرح ویژه طلایی
+      // پیش‌فرض: طرح بلک فرایدی
       const catSel = document.getElementById('category');
-      catSel.value = 'special';
+      catSel.value = 'blackFriday';
       onCategoryChange();
 
       document.getElementById('category').addEventListener('change', onCategoryChange);
@@ -660,6 +1050,8 @@
       });
       document.getElementById('btnCopy').addEventListener('click', copyResult);
       document.getElementById('btnShare').addEventListener('click', shareResult);
+
+      setupDownloadModal();
     });
   </script>
 </body>
